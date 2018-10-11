@@ -189,17 +189,12 @@ int main()
 
   bool keepGoing = true;
 
-  auto processEvent = [&](SDL_Event event)
-  {
-    if(event.type == SDL_QUIT)
-      keepGoing = false;
-  };
-
   while(keepGoing)
   {
     SDL_Event event;
     while(SDL_PollEvent(&event))
-      processEvent(event);
+      if(event.type == SDL_QUIT)
+        keepGoing = false;
 
     g_state.tick(g_Audio->getTime());
     SDL_Delay(1);
