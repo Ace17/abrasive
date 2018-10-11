@@ -5,6 +5,9 @@ all: $(BIN)/abrasive.exe
 SRCS:=\
 	src/main.cpp
 
+CXXFLAGS+=$(shell pkg-config sdl2 --cflags)
+LDFLAGS+=$(shell pkg-config sdl2 --libs)
+
 CXXFLAGS+=-g3
 LDFLAGS+=-g
 
