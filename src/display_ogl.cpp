@@ -50,12 +50,20 @@ struct OpenglDisplay : Display
 
   void update() override
   {
-    glClearColor(1, 0, 0, 1);
+    m_ambientLight *= 0.99;
+    glClearColor(m_ambientLight, m_ambientLight, m_ambientLight, 1);
     glClear(GL_COLOR_BUFFER_BIT);
     SDL_GL_SwapWindow(m_window);
   }
 
+  void showText(const char* msg) override
+  {
+    printf("%s\n", msg);
+    m_ambientLight = 0.5;
+  }
+
 private:
+  double m_ambientLight = 0;
   SDL_Window* m_window;
   SDL_GLContext m_context;
 };

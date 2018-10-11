@@ -60,8 +60,7 @@ struct State
     while(curr + 1 < (int)timeline.size() && now >= timeline[curr + 1].clockTime)
     {
       curr++;
-      printf("\r%s                     ", timeline[curr].text);
-      fflush(stdout);
+      m_display->showText(timeline[curr].text);
     }
 
     m_display->update();
