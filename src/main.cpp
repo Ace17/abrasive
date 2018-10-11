@@ -1,6 +1,8 @@
 #include <cstdio>
 #include <cstdint>
 #include <vector>
+#include <memory>
+#include <fstream>
 
 using namespace std;
 
@@ -63,42 +65,95 @@ void Fail(const char* fmt, ...)
 
 int64_t g_totalSamples;
 
-void mixAudio(void* userParam, Uint8* buffer, int size)
+struct Audio
 {
-  memset(buffer, 0, size);
-  g_totalSamples += size / 4;
-}
+  Audio()
+  {
+    m_music = load("assets/music.pcm");
+
+    if(SDL_InitSubSystem(SDL_INIT_AUDIO))
+      Fail("Can't init audio");
+
+    SDL_AudioSpec requested {};
+    requested.samples = 8192;
+    requested.freq = 22050;
+    requested.format = AUDIO_S16;
+    requested.channels = 2;
+    requested.callback = &staticMixAudio;
+    requested.userdata = this;
+
+    SDL_AudioSpec actual {};
+    if(SDL_OpenAudio(&requested, &actual))
+      Fail("Can't open audio");
+
+    fprintf(stderr, "[audio] %d Hz %d ch %d samples (%.2f ms)\n", actual.freq, actual.channels, actual.samples, actual.samples * 1000.0 / double(actual.freq));
+
+    SDL_PauseAudio(0);
+  }
+
+  ~Audio()
+  {
+    SDL_PauseAudio(1);
+    SDL_CloseAudio();
+    SDL_QuitSubSystem(SDL_INIT_AUDIO);
+  }
+
+private:
+  vector<int16_t> m_music;
+  int m_musicReadPos = 0;
+
+  static
+  vector<int16_t> load(const char* path)
+  {
+    auto fp = ifstream(path, ios::binary);
+    if(!fp.is_open())
+      Fail("Can't open music file: '%s'", path);
+
+    fp.seekg(0, ios::end);
+    auto size = fp.tellg();
+    fp.seekg(0, ios::beg);
+
+    vector<int16_t> buf;
+    buf.resize(size / sizeof(int16_t));
+    fp.read((char*)buf.data(), buf.size());
+
+    return buf;
+  }
+
+  static void staticMixAudio(void* userParam, Uint8* buffer, int size)
+  {
+    auto pThis = (Audio*)userParam;
+    pThis->mixAudio(buffer, size);
+  }
+
+  void mixAudio(uint8_t* dst, int size)
+  {
+    memset(dst, 0, size);
+    g_totalSamples += size / 4;
+
+    auto remaining = (int)m_music.size() - m_musicReadPos;
+    auto readSize = std::min(size, remaining);
+    memcpy(dst, (uint8_t*)m_music.data() + m_musicReadPos, readSize);
+    m_musicReadPos += readSize;
+  }
+};
 
 int64_t getAudioTime()
 {
   return g_totalSamples * 1000.0 / 22050.0;
 }
 
+unique_ptr<Audio> g_Audio;
+
 void init()
 {
-  SDL_Init(SDL_INIT_EVERYTHING);
-
-  SDL_AudioSpec requested {};
-  requested.samples = 4096;
-  requested.freq = 22050;
-  requested.format = AUDIO_S16;
-  requested.channels = 2;
-  requested.callback = &mixAudio;
-
-  SDL_AudioSpec actual {};
-  if(SDL_OpenAudio(&requested, &actual))
-    Fail("Can't open audio");
-
-  fprintf(stderr, "[audio] %d Hz %d ch\n", actual.freq, actual.channels);
-
-  SDL_PauseAudio(0);
+  SDL_InitSubSystem(SDL_INIT_EVENTS);
+  g_Audio = make_unique<Audio>();
 }
 
 void destroy()
 {
-  SDL_PauseAudio(1);
-  SDL_CloseAudio();
-  SDL_Quit();
+  g_Audio.reset();
   fprintf(stderr, "OK\n");
 }
 
