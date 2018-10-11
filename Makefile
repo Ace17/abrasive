@@ -5,7 +5,8 @@ EXT?=exe
 all: $(BIN)/rel/abrasive.$(EXT)
 
 SRCS:=\
-	src/main.cpp
+	src/main.cpp\
+	src/audio_sdl.cpp\
 
 CXXFLAGS+=$(shell pkg-config sdl2 --cflags)
 LDFLAGS+=$(shell pkg-config sdl2 --libs)
