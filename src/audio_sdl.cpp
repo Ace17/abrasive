@@ -103,6 +103,7 @@ private:
       if(m_musicPos >= m_music.size())
         m_musicPos = m_music.size() / 2;
 
+      samples += readSize;
       count -= readSize;
     }
 
