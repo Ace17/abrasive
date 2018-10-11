@@ -51,14 +51,47 @@ struct State
 
 static State g_state;
 
+void Fail(const char* fmt, ...)
+{
+  va_list va;
+  va_start(va, fmt);
+  char buffer[4096] {};
+  vsnprintf(buffer, sizeof buffer - 1, fmt, va);
+  fprintf(stderr, "Fatal: %s\n", buffer);
+  exit(1);
+}
+
+void mixAudio(void* userParam, Uint8* buffer, int size)
+{
+  memset(buffer, 0, size);
+}
+
 void init()
 {
   SDL_Init(SDL_INIT_EVERYTHING);
+
+  SDL_AudioSpec requested {};
+  requested.samples = 4096;
+  requested.freq = 22050;
+  requested.format = AUDIO_S16;
+  requested.channels = 2;
+  requested.callback = &mixAudio;
+
+  SDL_AudioSpec actual {};
+  if(SDL_OpenAudio(&requested, &actual))
+    Fail("Can't open audio");
+
+  fprintf(stderr, "[audio] %d Hz %d ch\n", actual.freq, actual.channels);
+
+  SDL_PauseAudio(0);
 }
 
 void destroy()
 {
+  SDL_PauseAudio(1);
+  SDL_CloseAudio();
   SDL_Quit();
+  fprintf(stderr, "OK\n");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
