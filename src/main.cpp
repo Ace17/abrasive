@@ -127,7 +127,7 @@ private:
 
     vector<int16_t> buf;
     buf.resize(size / sizeof(int16_t));
-    fp.read((char*)buf.data(), buf.size());
+    fp.read((char*)buf.data(), buf.size() * sizeof(int16_t));
 
     return buf;
   }
