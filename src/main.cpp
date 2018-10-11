@@ -16,16 +16,13 @@ struct Event
 const vector<Event> timeline =
 {
   { 0.00, "0 - Start" },
-  { 1.00, "1" },
-  { 2.00, "2" },
-  { 3.00, "3" },
-  { 4.00, "4" },
-  { 5.00, "5" },
-  { 6.00, "6" },
-  { 7.00, "7" },
-  { 8.00, "8" },
-  { 16.00, "16 - Start drums" },
-  { 24.00, "24" },
+  { 4.00, "4 - " },
+  { 8.00, "8 - " },
+  { 12.00, "8 - " },
+  { 16.00, "16 - " },
+  { 20.00, "20 - " },
+  { 24.00, "24 - " },
+  { 28.00, "28 - " },
   { 32.00, "32 - Drumkit is rolling" },
   { 48.00, "48 - Saw FX" },
   { 64.00, "64 - Breakdown Sawtooth porta" },
@@ -49,7 +46,8 @@ struct State
     while(curr + 1 < (int)timeline.size() && now >= timeline[curr + 1].clockTime)
     {
       curr++;
-      printf("%s\n", timeline[curr].text);
+      printf("\r%s                     ", timeline[curr].text);
+      fflush(stdout);
     }
   }
 };
@@ -58,20 +56,25 @@ struct State
 
 #include "SDL.h"
 #include "audio.h"
+#include "display.h"
 
 static State g_state;
 
 unique_ptr<Audio> g_Audio;
+unique_ptr<Display> g_Display;
 
 void init()
 {
   SDL_InitSubSystem(SDL_INIT_EVENTS);
+  g_Display = createDisplay();
   g_Audio = createAudio();
 }
 
 void destroy()
 {
   g_Audio.reset();
+  g_Display.reset();
+  SDL_QuitSubSystem(SDL_INIT_EVENTS);
   fprintf(stderr, "OK\n");
 }
 
@@ -92,6 +95,7 @@ int main()
         keepGoing = false;
 
     g_state.tick(g_Audio->getTime());
+    g_Display->update();
     SDL_Delay(1);
   }
 

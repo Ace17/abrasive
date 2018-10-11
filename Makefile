@@ -7,9 +7,10 @@ all: $(BIN)/rel/abrasive.$(EXT)
 SRCS:=\
 	src/main.cpp\
 	src/audio_sdl.cpp\
+	src/display_ogl.cpp\
 
-CXXFLAGS+=$(shell pkg-config sdl2 --cflags)
-LDFLAGS+=$(shell pkg-config sdl2 --libs)
+CXXFLAGS+=$(shell pkg-config gl sdl2 --cflags)
+LDFLAGS+=$(shell pkg-config gl sdl2 --libs)
 
 CXXFLAGS+=-g3
 LDFLAGS+=-g
