@@ -61,6 +61,7 @@ struct State
     {
       curr++;
       m_display->showText(timeline[curr].text);
+      m_display->pulse();
     }
 
     m_display->update();

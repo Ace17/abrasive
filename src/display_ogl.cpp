@@ -9,6 +9,25 @@
 
 using namespace std;
 
+GLuint loadTexture(const char* path)
+{
+  auto surf = shared_ptr<SDL_Surface>(SDL_LoadBMP(path), &SDL_FreeSurface);
+  if(!surf)
+    Fail("Can't load texture '%s'", path);
+
+  GLuint texture;
+  glGenTextures(1, &texture);
+  glBindTexture(GL_TEXTURE_2D, texture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, surf->pixels);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  return 0;
+}
+
 struct OpenglDisplay : Display
 {
   OpenglDisplay()
@@ -21,6 +40,8 @@ struct OpenglDisplay : Display
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
+    m_font = loadTexture("assets/font.bmp");
 
     m_window = SDL_CreateWindow(
         "Abrasive",
@@ -50,7 +71,8 @@ struct OpenglDisplay : Display
 
   void update() override
   {
-    m_ambientLight *= 0.99;
+    m_ambientLight *= 0.97;
+
     glClearColor(m_ambientLight, m_ambientLight, m_ambientLight, 1);
     glClear(GL_COLOR_BUFFER_BIT);
     SDL_GL_SwapWindow(m_window);
@@ -59,6 +81,10 @@ struct OpenglDisplay : Display
   void showText(const char* msg) override
   {
     printf("%s\n", msg);
+  }
+
+  void pulse() override
+  {
     m_ambientLight = 0.5;
   }
 
@@ -66,6 +92,7 @@ private:
   double m_ambientLight = 0;
   SDL_Window* m_window;
   SDL_GLContext m_context;
+  GLuint m_font;
 };
 
 unique_ptr<Display> createDisplay()
