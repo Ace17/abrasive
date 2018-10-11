@@ -1,10 +1,10 @@
-#include "SDL.h" // SDL_Delay
 #include <cstdio>
+#include <cstdint>
 #include <vector>
 
 using namespace std;
 
-auto const BPM = 120.0;
+auto const BPM = 85.0;
 
 struct Event
 {
@@ -23,20 +23,20 @@ const vector<Event> timeline =
   { 20, "world" },
 } ;
 
-int startTime;
-
 // in beats
+extern int64_t getTicks();
+
 double getClock()
 {
-  static const int startTime = SDL_GetTicks();
-  return (SDL_GetTicks() - startTime) * BPM / 60000.0;
+  static const int startTime = getTicks();
+  return (getTicks() - startTime) * BPM / 60000.0;
 }
 
-int main()
+struct State
 {
   int curr = 0;
 
-  while(1)
+  void tick()
   {
     auto now = getClock();
     if(curr + 1 < (int)timeline.size() && now >= timeline[curr+1].clockTime)
@@ -44,6 +44,24 @@ int main()
       curr++;
       printf("%s\n", timeline[curr].text);
     }
+  }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+#include "SDL.h" // SDL_Delay, SDL_GetTicks
+
+int64_t getTicks()
+{
+  return SDL_GetTicks();
+}
+
+int main()
+{
+  State s;
+  while(1)
+  {
+    s.tick();
     SDL_Delay(1);
   }
   return 0;
