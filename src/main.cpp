@@ -3,10 +3,11 @@
 #include <vector>
 #include <memory>
 #include <fstream>
+#include <atomic>
 
 using namespace std;
 
-auto const BPM = 85.0;
+auto const BPM = 72.0;
 
 struct Event
 {
@@ -16,30 +17,35 @@ struct Event
 
 const vector<Event> timeline =
 {
-  { 0, "" },
-  { 1, "A" },
-  { 2, "B" },
-  { 3, "C" },
-  { 4, "D" },
-  { 10, "hello" },
-  { 20, "world" },
+  { 0.00, "0" },
+  { 1.00, "1" },
+  { 2.00, "2" },
+  { 3.00, "3" },
+  { 4.00, "4" },
+  { 5.00, "5" },
+  { 6.00, "6" },
+  { 7.00, "7" },
+  { 8.00, "8" },
+  { 16.00, "16" },
+  { 24.00, "24" },
+  { 32.00, "32" },
 } ;
 
 // in beats
-double getClock(int64_t ticks)
+double getClock(double seconds)
 {
-  static const int startTime = ticks;
-  return (ticks - startTime) * BPM / 60000.0;
+  return seconds * (BPM / 60);
 }
 
 struct State
 {
-  int curr = 0;
+  int curr = -1;
 
-  void tick(int64_t ticks)
+  void tick(double seconds)
   {
-    auto now = getClock(ticks);
-    if(curr + 1 < (int)timeline.size() && now >= timeline[curr+1].clockTime)
+    auto now = getClock(seconds);
+
+    while(curr + 1 < (int)timeline.size() && now >= timeline[curr+1].clockTime)
     {
       curr++;
       printf("%s\n", timeline[curr].text);
@@ -63,8 +69,6 @@ void Fail(const char* fmt, ...)
   exit(1);
 }
 
-int64_t g_totalSamples;
-
 struct Audio
 {
   Audio()
@@ -75,8 +79,8 @@ struct Audio
       Fail("Can't init audio");
 
     SDL_AudioSpec requested {};
-    requested.samples = 8192;
-    requested.freq = 22050;
+    requested.samples = 128;
+    requested.freq = SAMPLERATE;
     requested.format = AUDIO_S16;
     requested.channels = 2;
     requested.callback = &staticMixAudio;
@@ -88,6 +92,7 @@ struct Audio
 
     fprintf(stderr, "[audio] %d Hz %d ch %d samples (%.2f ms)\n", actual.freq, actual.channels, actual.samples, actual.samples * 1000.0 / double(actual.freq));
 
+    m_timeInSamples = -actual.samples;
     SDL_PauseAudio(0);
   }
 
@@ -98,9 +103,16 @@ struct Audio
     SDL_QuitSubSystem(SDL_INIT_AUDIO);
   }
 
+  double getTime()
+  {
+    return m_timeInSamples / double(SAMPLERATE);
+  }
+
 private:
   vector<int16_t> m_music;
-  int m_musicReadPos = 0;
+  int m_musicPos = 0;
+
+  std::atomic<int64_t> m_timeInSamples; // incremented at each audio callback
 
   static
   vector<int16_t> load(const char* path)
@@ -123,25 +135,23 @@ private:
   static void staticMixAudio(void* userParam, Uint8* buffer, int size)
   {
     auto pThis = (Audio*)userParam;
-    pThis->mixAudio(buffer, size);
+    memset(buffer, 0, size);
+    pThis->mixSamples((short*)buffer, size/sizeof(short));
   }
 
-  void mixAudio(uint8_t* dst, int size)
+  void mixSamples(short* samples, int count)
   {
-    memset(dst, 0, size);
-    g_totalSamples += size / 4;
+    auto remaining = (int)m_music.size() - m_musicPos;
+    auto readSize = std::min(count, remaining);
+    memcpy(samples, m_music.data() + m_musicPos, readSize * sizeof(short));
+    m_musicPos += readSize;
 
-    auto remaining = (int)m_music.size() - m_musicReadPos;
-    auto readSize = std::min(size, remaining);
-    memcpy(dst, (uint8_t*)m_music.data() + m_musicReadPos, readSize);
-    m_musicReadPos += readSize;
+    m_timeInSamples += count / CHANNELS;
   }
-};
 
-int64_t getAudioTime()
-{
-  return g_totalSamples * 1000.0 / 22050.0;
-}
+  static auto const CHANNELS = 2;
+  static auto const SAMPLERATE = 22050;
+};
 
 unique_ptr<Audio> g_Audio;
 
@@ -177,7 +187,7 @@ int main()
     while(SDL_PollEvent(&event))
       processEvent(event);
 
-    g_state.tick(getAudioTime());
+    g_state.tick(g_Audio->getTime());
     SDL_Delay(1);
   }
 
