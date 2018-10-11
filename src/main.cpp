@@ -24,21 +24,19 @@ const vector<Event> timeline =
 } ;
 
 // in beats
-extern int64_t getTicks();
-
-double getClock()
+double getClock(int64_t ticks)
 {
-  static const int startTime = getTicks();
-  return (getTicks() - startTime) * BPM / 60000.0;
+  static const int startTime = ticks;
+  return (ticks - startTime) * BPM / 60000.0;
 }
 
 struct State
 {
   int curr = 0;
 
-  void tick()
+  void tick(int64_t ticks)
   {
-    auto now = getClock();
+    auto now = getClock(ticks);
     if(curr + 1 < (int)timeline.size() && now >= timeline[curr+1].clockTime)
     {
       curr++;
@@ -51,19 +49,43 @@ struct State
 
 #include "SDL.h" // SDL_Delay, SDL_GetTicks
 
-int64_t getTicks()
+static State g_state;
+
+void init()
 {
-  return SDL_GetTicks();
+  SDL_Init(SDL_INIT_EVERYTHING);
 }
+
+void destroy()
+{
+  SDL_Quit();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 int main()
 {
-  State s;
-  while(1)
+  init();
+
+  bool keepGoing = true;
+
+  auto processEvent = [&](SDL_Event event)
   {
-    s.tick();
+    if(event.type == SDL_QUIT)
+      keepGoing = false;
+  };
+
+  while(keepGoing)
+  {
+    SDL_Event event;
+    while(SDL_PollEvent(&event))
+      processEvent(event);
+
+    g_state.tick(SDL_GetTicks());
     SDL_Delay(1);
   }
+
+  destroy();
   return 0;
 }
 

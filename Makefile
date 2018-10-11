@@ -1,6 +1,8 @@
 BIN?=bin
 
-all: $(BIN)/abrasive.exe
+EXT?=exe
+
+all: $(BIN)/rel/abrasive.$(EXT)
 
 SRCS:=\
 	src/main.cpp
@@ -11,7 +13,7 @@ LDFLAGS+=$(shell pkg-config sdl2 --libs)
 CXXFLAGS+=-g3
 LDFLAGS+=-g
 
-$(BIN)/abrasive.exe: $(SRCS:%=$(BIN)/%.o)
+$(BIN)/rel/abrasive.$(EXT): $(SRCS:%=$(BIN)/%.o)
 
 #------------------------------------------------------------------------------
 
