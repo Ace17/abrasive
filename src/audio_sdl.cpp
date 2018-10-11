@@ -34,6 +34,7 @@ struct SdlAudio : Audio
     requested.userdata = this;
 
     SDL_AudioSpec actual {};
+
     if(SDL_OpenAudio(&requested, &actual))
       Fail("Can't open audio");
 
@@ -65,6 +66,7 @@ private:
   vector<int16_t> load(const char* path)
   {
     auto fp = ifstream(path, ios::binary);
+
     if(!fp.is_open())
       Fail("Can't open music file: '%s'", path);
 
@@ -83,7 +85,7 @@ private:
   {
     auto pThis = (SdlAudio*)userParam;
     memset(buffer, 0, size);
-    pThis->mixSamples((short*)buffer, size/sizeof(short));
+    pThis->mixSamples((short*)buffer, size / sizeof(short));
   }
 
   void mixSamples(short* samples, int count)
@@ -99,7 +101,7 @@ private:
 
       // loop point is halfway
       if(m_musicPos >= m_music.size())
-        m_musicPos = m_music.size()/2;
+        m_musicPos = m_music.size() / 2;
 
       count -= readSize;
     }

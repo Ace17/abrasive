@@ -30,7 +30,7 @@ const vector<Event> timeline =
   { 48.00, "48 - Saw FX" },
   { 64.00, "64 - Breakdown Sawtooth porta" },
   { 96.00, "96 - End" },
-} ;
+};
 
 // in beats
 double getClock(double seconds)
@@ -46,7 +46,7 @@ struct State
   {
     auto now = getClock(seconds);
 
-    while(curr + 1 < (int)timeline.size() && now >= timeline[curr+1].clockTime)
+    while(curr + 1 < (int)timeline.size() && now >= timeline[curr + 1].clockTime)
     {
       curr++;
       printf("%s\n", timeline[curr].text);
@@ -86,6 +86,7 @@ int main()
   while(keepGoing)
   {
     SDL_Event event;
+
     while(SDL_PollEvent(&event))
       if(event.type == SDL_QUIT)
         keepGoing = false;
