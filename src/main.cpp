@@ -7,7 +7,7 @@
 
 using namespace std;
 
-auto const BPM = 72.0;
+auto const BPM = 72.5;
 
 struct Event
 {
@@ -17,7 +17,7 @@ struct Event
 
 const vector<Event> timeline =
 {
-  { 0.00, "0" },
+  { 0.00, "0 - Start" },
   { 1.00, "1" },
   { 2.00, "2" },
   { 3.00, "3" },
@@ -26,9 +26,12 @@ const vector<Event> timeline =
   { 6.00, "6" },
   { 7.00, "7" },
   { 8.00, "8" },
-  { 16.00, "16" },
+  { 16.00, "16 - Start drums" },
   { 24.00, "24" },
-  { 32.00, "32" },
+  { 32.00, "32 - Drumkit is rolling" },
+  { 48.00, "48 - Saw FX" },
+  { 64.00, "64 - Breakdown Sawtooth porta" },
+  { 96.00, "96 - End" },
 } ;
 
 // in beats
