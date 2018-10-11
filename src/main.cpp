@@ -144,12 +144,23 @@ private:
 
   void mixSamples(short* samples, int count)
   {
-    auto remaining = (int)m_music.size() - m_musicPos;
-    auto readSize = std::min(count, remaining);
-    memcpy(samples, m_music.data() + m_musicPos, readSize * sizeof(short));
-    m_musicPos += readSize;
+    auto const deltaTime = count / CHANNELS;
 
-    m_timeInSamples += count / CHANNELS;
+    while(count > 0)
+    {
+      auto remaining = (int)m_music.size() - m_musicPos;
+      auto readSize = std::min(count, remaining);
+      memcpy(samples, m_music.data() + m_musicPos, readSize * sizeof(short));
+      m_musicPos += readSize;
+
+      // loop point is halfway
+      if(m_musicPos >= m_music.size())
+        m_musicPos = m_music.size()/2;
+
+      count -= readSize;
+    }
+
+    m_timeInSamples += deltaTime;
   }
 
   static auto const CHANNELS = 2;
