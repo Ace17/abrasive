@@ -47,7 +47,7 @@ struct State
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "SDL.h" // SDL_Delay, SDL_GetTicks
+#include "SDL.h"
 
 static State g_state;
 
@@ -61,9 +61,17 @@ void Fail(const char* fmt, ...)
   exit(1);
 }
 
+int64_t g_totalSamples;
+
 void mixAudio(void* userParam, Uint8* buffer, int size)
 {
   memset(buffer, 0, size);
+  g_totalSamples += size / 4;
+}
+
+int64_t getAudioTime()
+{
+  return g_totalSamples * 1000.0 / 22050.0;
 }
 
 void init()
@@ -114,7 +122,7 @@ int main()
     while(SDL_PollEvent(&event))
       processEvent(event);
 
-    g_state.tick(SDL_GetTicks());
+    g_state.tick(getAudioTime());
     SDL_Delay(1);
   }
 
