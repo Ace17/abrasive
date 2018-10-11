@@ -1,7 +1,16 @@
+// =============================================================================
+// A B R A S I V E
+//
+// by Sebastien Alaiwan
+//
+// =============================================================================
 #include <cstdio>
 #include <cstdint>
 #include <vector>
 #include <memory>
+
+#include "audio.h"
+#include "display.h"
 
 using namespace std;
 
@@ -37,10 +46,15 @@ double getClock(double seconds)
 
 struct State
 {
-  int curr = -1;
-
-  void tick(double seconds)
+  State() :
+    m_display(createDisplay()),
+    m_audio(createAudio())
   {
+  }
+
+  void tick()
+  {
+    auto seconds = m_audio->getTime();
     auto now = getClock(seconds);
 
     while(curr + 1 < (int)timeline.size() && now >= timeline[curr + 1].clockTime)
@@ -49,31 +63,33 @@ struct State
       printf("\r%s                     ", timeline[curr].text);
       fflush(stdout);
     }
+
+    m_display->update();
   }
+
+private:
+  int curr = -1;
+
+  unique_ptr<Audio> m_audio;
+  unique_ptr<Display> m_display;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// Here begins the SDL-dependent part
 
 #include "SDL.h"
-#include "audio.h"
-#include "display.h"
 
-static State g_state;
-
-unique_ptr<Audio> g_Audio;
-unique_ptr<Display> g_Display;
+static unique_ptr<State> g_state;
 
 void init()
 {
   SDL_InitSubSystem(SDL_INIT_EVENTS);
-  g_Display = createDisplay();
-  g_Audio = createAudio();
+  g_state = make_unique<State>();
 }
 
 void destroy()
 {
-  g_Audio.reset();
-  g_Display.reset();
+  g_state.reset();
   SDL_QuitSubSystem(SDL_INIT_EVENTS);
   fprintf(stderr, "OK\n");
 }
@@ -94,8 +110,7 @@ int main()
       if(event.type == SDL_QUIT)
         keepGoing = false;
 
-    g_state.tick(g_Audio->getTime());
-    g_Display->update();
+    g_state->tick();
     SDL_Delay(1);
   }
 
