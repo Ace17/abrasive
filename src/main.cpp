@@ -82,7 +82,7 @@ struct Audio
       Fail("Can't init audio");
 
     SDL_AudioSpec requested {};
-    requested.samples = 128;
+    requested.samples = 4096;
     requested.freq = SAMPLERATE;
     requested.format = AUDIO_S16;
     requested.channels = 2;
