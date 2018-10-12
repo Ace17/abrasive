@@ -1,6 +1,7 @@
 #include "display.h"
 #include "error.h"
 #include <memory>
+#include <vector>
 
 #include "SDL.h"
 
@@ -12,13 +13,31 @@ using namespace std;
 GLuint loadTexture(const char* path)
 {
   auto surf = shared_ptr<SDL_Surface>(SDL_LoadBMP(path), &SDL_FreeSurface);
+
   if(!surf)
     Fail("Can't load texture '%s'", path);
 
   GLuint texture;
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, surf->pixels);
+
+  auto const WIDTH = 256;
+  auto const HEIGHT = 256;
+
+  // vertically flip the picture so the bottom-left corresponds to UV (0;0).
+  // (This is ironic, as SDL just did the reverse operation
+  // after loading the BMP, which is stored upside down).
+  vector<uint8_t> upsideDownBuffer(WIDTH* HEIGHT * 4);
+  auto dst = upsideDownBuffer.data();
+
+  for(int row = 0; row < HEIGHT; ++row)
+  {
+    auto const ROW_SIZE = WIDTH * 4;
+    memcpy(dst, ((uint8_t*)surf->pixels) + row * surf->pitch, ROW_SIZE);
+    dst += ROW_SIZE;
+  }
+
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, upsideDownBuffer.data());
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
