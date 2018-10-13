@@ -37,8 +37,8 @@ GLuint loadTexture(const char* path)
   CALL(glGenTextures(1, &texture));
   CALL(glBindTexture(GL_TEXTURE_2D, texture));
 
-  auto const WIDTH = 256;
-  auto const HEIGHT = 256;
+  auto const WIDTH = surf->w;
+  auto const HEIGHT = surf->h;
 
   // vertically flip the picture so the bottom-left corresponds to UV (0;0).
   // (This is ironic, as SDL just did the reverse operation
@@ -53,7 +53,7 @@ GLuint loadTexture(const char* path)
     dst += ROW_SIZE;
   }
 
-  CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, upsideDownBuffer.data()));
+  CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, WIDTH, HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, upsideDownBuffer.data()));
   CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
   CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
   CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
