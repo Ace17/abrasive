@@ -1,13 +1,11 @@
 # x y z - nx ny nz - u1 v1 - u2 v2
 
-# Front facing triangle
 0 0 0 - 1 0 0 - 0 0 - 0 0
-0 1 0 - 1 0 0 - 0 1 - 0 0
 1 1 0 - 1 0 0 - 1 1 - 0 0
+0 1 0 - 1 0 0 - 0 1 - 0 0
 
-# Back facing triangle
 0 0 0 - 1 0 0 - 0 0 - 0 0
+1 0 0 - 1 0 0 - 0 1 - 0 0
 1 1 0 - 1 0 0 - 1 1 - 0 0
-0 1 0 - 1 0 0 - 0 1 - 0 0
 
 # vim: syntax=sh
