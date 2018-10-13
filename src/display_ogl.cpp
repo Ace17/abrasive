@@ -164,6 +164,10 @@ struct OpenglDisplay : Display
 
     // V-sync
     SDL_GL_SetSwapInterval(1);
+
+    GLuint vertexArray;
+    CALL(glGenVertexArrays(1, &vertexArray));
+    CALL(glBindVertexArray(vertexArray));
   }
 
   ~OpenglDisplay()
@@ -177,21 +181,19 @@ struct OpenglDisplay : Display
   {
     m_ambientLight *= 0.97;
 
+    updateViewport();
+
     CALL(glClearColor(m_ambientLight, m_ambientLight, m_ambientLight, 1));
     CALL(glClear(GL_COLOR_BUFFER_BIT));
+
+    drawObjects();
+
     SDL_GL_SwapWindow(m_window);
   }
 
   void showText(const char* msg) override
   {
     printf("%s\n", msg);
-  }
-
-  template<typename T>
-  void grow(vector<T>& v, int index)
-  {
-    if(index >= (int)v.size())
-      v.resize(index + 1);
   }
 
   void loadShader(int id, const char* path)
@@ -213,8 +215,18 @@ struct OpenglDisplay : Display
 
   void loadModel(int id, const char* path) override
   {
-    grow(m_meshes, id);
-    m_meshes[id] = loadMesh(path);
+    Model model;
+
+    model.mesh = loadMesh(path);
+    auto& vertices = model.mesh.vertices;
+
+    CALL(glGenBuffers(1, &model.buffer));
+    CALL(glBindBuffer(GL_ARRAY_BUFFER, model.buffer));
+    CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_STATIC_DRAW));
+    CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+
+    grow(m_models, id);
+    m_models[id] = model;
   }
 
   void drawModel(int id, Vec3 pos)
@@ -231,8 +243,62 @@ private:
   SDL_Window* m_window;
   SDL_GLContext m_context;
   GLuint m_font;
-  vector<Mesh> m_meshes;
+
+  struct Model
+  {
+    Mesh mesh;
+    GLuint buffer;
+  };
+
+  vector<Model> m_models;
   vector<GLuint> m_shaders;
+
+  void updateViewport()
+  {
+    int width, height;
+    SDL_GL_GetDrawableSize(m_window, &width, &height);
+    CALL(glViewport(0, 0, width, height));
+  }
+
+  void drawObjects()
+  {
+    if(m_shaders.empty() || m_models.empty())
+      return;
+
+    auto& model = m_models[0];
+    int program = m_shaders[0];
+    CALL(glUseProgram(program));
+    CALL(glBindBuffer(GL_ARRAY_BUFFER, model.buffer));
+    connectAttribute(0, 3, program, "vertexPos");
+    CALL(glDrawArrays(GL_TRIANGLES, 0, model.mesh.vertices.size()));
+    CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+  }
+
+  static void connectAttribute(int offset, int size, int program, const char* name)
+  {
+    auto const stride = sizeof(Vertex);
+    auto const index = getAttributeIndex(program, name);
+    auto pOffset = (const GLvoid*)(offset * sizeof(GLfloat));
+    CALL(glEnableVertexAttribArray(index));
+    CALL(glVertexAttribPointer(index, size, GL_FLOAT, GL_FALSE, stride, pOffset));
+  }
+
+  static GLuint getAttributeIndex(int program, const char* name)
+  {
+    auto const index = glGetAttribLocation(program, name);
+
+    if(index < 0)
+      Fail("Unknown shader attribute: '%s'", name);
+
+    return index;
+  }
+
+  template<typename T>
+  static void grow(vector<T>& v, int index)
+  {
+    if(index >= (int)v.size())
+      v.resize(index + 1);
+  }
 };
 
 unique_ptr<Display> createDisplay()
