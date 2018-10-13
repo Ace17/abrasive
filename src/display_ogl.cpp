@@ -187,6 +187,13 @@ struct OpenglDisplay : Display
     printf("%s\n", msg);
   }
 
+  template<typename T>
+  void grow(vector<T>& v, int index)
+  {
+    if(index >= (int)v.size())
+      v.resize(index + 1);
+  }
+
   void loadShader(int id, const char* path)
   {
     string basePath = path;
@@ -200,17 +207,13 @@ struct OpenglDisplay : Display
     CALL(glDeleteShader(vertexId));
     CALL(glDeleteShader(fragmentId));
 
-    if(id >= m_shaders.size())
-      m_shaders.resize(id + 1);
-
+    grow(m_shaders, id);
     m_shaders[id] = progId;
   }
 
   void loadModel(int id, const char* path) override
   {
-    if(id >= m_meshes.size())
-      m_meshes.resize(id + 1);
-
+    grow(m_meshes, id);
     m_meshes[id] = loadMesh(path);
   }
 
