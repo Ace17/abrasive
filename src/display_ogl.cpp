@@ -270,6 +270,7 @@ private:
     CALL(glUseProgram(program));
     CALL(glBindBuffer(GL_ARRAY_BUFFER, model.buffer));
     connectAttribute(0, 3, program, "vertexPos");
+    connectAttribute(6, 2, program, "vertexUV");
     CALL(glDrawArrays(GL_TRIANGLES, 0, model.mesh.vertices.size()));
     CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
   }
