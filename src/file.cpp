@@ -17,8 +17,7 @@ std::vector<T> load(const char* path)
   auto size = fp.tellg();
   fp.seekg(0, ios::beg);
 
-  vector<T> buf;
-  buf.resize(size / sizeof(T));
+  vector<T> buf(size / sizeof(T));
   fp.read((char*)buf.data(), buf.size() * sizeof(T));
 
   return buf;
