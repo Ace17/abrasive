@@ -50,6 +50,7 @@ struct State
     m_display(createDisplay()),
     m_audio(createAudio())
   {
+    m_display->loadModel(0, "assets/meshes/box.mesh");
   }
 
   void tick()

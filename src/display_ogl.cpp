@@ -1,5 +1,7 @@
 #include "display.h"
 #include "error.h"
+#include "mesh.h"
+
 #include <memory>
 #include <vector>
 
@@ -8,6 +10,8 @@
 #define GL_GLEXT_PROTOTYPES 1
 #include "GL/gl.h"
 
+using namespace std;
+
 static void checkGl(const char* caption, const char* file, int line)
 {
 #ifndef NDEBUG
@@ -15,13 +19,12 @@ static void checkGl(const char* caption, const char* file, int line)
 
   if(errorCode != GL_NO_ERROR)
     Fail("[%s:%d] %s returned %d\n", file, line, caption, errorCode);
+
 #endif
 }
 
 #define CALL(a) \
   do { a; checkGl(# a, __FILE__, __LINE__); } while(0)
-
-using namespace std;
 
 GLuint loadTexture(const char* path)
 {
@@ -115,6 +118,18 @@ struct OpenglDisplay : Display
     printf("%s\n", msg);
   }
 
+  void loadModel(int id, const char* path) override
+  {
+    if(id >= m_meshes.size())
+      m_meshes.resize(id + 1);
+
+    m_meshes[id] = loadMesh(path);
+  }
+
+  void drawModel(int id, Vec3 pos)
+  {
+  }
+
   void pulse() override
   {
     m_ambientLight = 0.5;
@@ -125,6 +140,7 @@ private:
   SDL_Window* m_window;
   SDL_GLContext m_context;
   GLuint m_font;
+  vector<Mesh> m_meshes;
 };
 
 unique_ptr<Display> createDisplay()
