@@ -2,8 +2,8 @@
 
 // Input vertex data
 in vec3 vertexPos;
-in vec2 vertexUV;
 in vec3 vertexNormal;
+in vec2 vertexUV;
 
 // Output data; will be interpolated for each fragment
 out vec2 UV;

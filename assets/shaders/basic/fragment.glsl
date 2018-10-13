@@ -9,9 +9,12 @@ in vec3 vNormal;
 // Ouput data
 out vec4 color;
 
+// Values that stay constant for the whole mesh
+uniform sampler2D DiffuseTex;
+
 void main()
 {
-  color = vec4(UV.x, UV.y, 0.3, 1.0);
+  color = texture2D(DiffuseTex, UV);
 }
 
 // vim: syntax=glsl

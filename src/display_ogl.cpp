@@ -52,7 +52,7 @@ GLuint loadTexture(const char* path)
   for(int row = 0; row < HEIGHT; ++row)
   {
     auto const ROW_SIZE = WIDTH * 4;
-    memcpy(dst, ((uint8_t*)surf->pixels) + row * surf->pitch, ROW_SIZE);
+    memcpy(dst, ((uint8_t*)surf->pixels) + (HEIGHT - 1 - row) * surf->pitch, ROW_SIZE);
     dst += ROW_SIZE;
   }
 
@@ -63,7 +63,9 @@ GLuint loadTexture(const char* path)
   CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
   CALL(glBindTexture(GL_TEXTURE_2D, 0));
 
-  return 0;
+  printf("[display] Loaded %s (%dx%d)\n", path, WIDTH, HEIGHT);
+
+  return texture;
 }
 
 static
@@ -145,8 +147,6 @@ struct OpenglDisplay : Display
 
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-    m_font = loadTexture("assets/font.bmp");
-
     m_window = SDL_CreateWindow(
         "Abrasive",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -164,6 +164,8 @@ struct OpenglDisplay : Display
 
     // V-sync
     SDL_GL_SetSwapInterval(1);
+
+    m_font = loadTexture("assets/font.bmp");
 
     GLuint vertexArray;
     CALL(glGenVertexArrays(1, &vertexArray));
@@ -268,11 +270,19 @@ private:
     auto& model = m_models[0];
     int program = m_shaders[0];
     CALL(glUseProgram(program));
+    CALL(glBindTexture(GL_TEXTURE_2D, m_font));
     CALL(glBindBuffer(GL_ARRAY_BUFFER, model.buffer));
+
     connectAttribute(0, 3, program, "vertexPos");
     connectAttribute(6, 2, program, "vertexUV");
+
+    // Texture Unit 0: Diffuse
+    CALL(glUniform1i(getUniformIndex(program, "DiffuseTex"), 0));
+
     CALL(glDrawArrays(GL_TRIANGLES, 0, model.mesh.vertices.size()));
+
     CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    CALL(glBindTexture(GL_TEXTURE_2D, 0));
   }
 
   static void connectAttribute(int offset, int size, int program, const char* name)
@@ -287,6 +297,16 @@ private:
   static GLuint getAttributeIndex(int program, const char* name)
   {
     auto const index = glGetAttribLocation(program, name);
+
+    if(index < 0)
+      Fail("Unknown shader attribute: '%s'", name);
+
+    return index;
+  }
+
+  static GLuint getUniformIndex(int program, const char* name)
+  {
+    auto const index = glGetUniformLocation(program, name);
 
     if(index < 0)
       Fail("Unknown shader attribute: '%s'", name);
