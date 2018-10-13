@@ -16,6 +16,16 @@ using namespace std;
 
 auto const BPM = 72.5;
 
+enum
+{
+  MODEL_BOX,
+};
+
+enum
+{
+  SHADER_BASIC,
+};
+
 struct Event
 {
   double clockTime; // in beats
@@ -50,8 +60,8 @@ struct State
     m_display(createDisplay()),
     m_audio(createAudio("assets/music.pcm"))
   {
-    m_display->loadShader(0, "assets/shaders/basic");
-    m_display->loadModel(0, "assets/meshes/box.mesh");
+    m_display->loadShader(SHADER_BASIC, "assets/shaders/basic");
+    m_display->loadModel(MODEL_BOX, "assets/meshes/box.mesh");
   }
 
   void tick()
@@ -64,6 +74,14 @@ struct State
       curr++;
       m_display->showText(timeline[curr].text);
       m_display->pulse();
+    }
+
+    if(int(now) % 2 == 0)
+    {
+      Actor actor;
+      actor.model = MODEL_BOX;
+      actor.shader = SHADER_BASIC;
+      m_display->pushActor(actor);
     }
 
     m_display->update();

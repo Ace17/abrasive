@@ -191,6 +191,7 @@ struct OpenglDisplay : Display
     drawObjects();
 
     SDL_GL_SwapWindow(m_window);
+    m_actors.clear();
   }
 
   void showText(const char* msg) override
@@ -231,8 +232,9 @@ struct OpenglDisplay : Display
     m_models[id] = model;
   }
 
-  void drawModel(int id, Vec3 pos)
+  void pushActor(Actor const& actor) override
   {
+    m_actors.push_back(actor);
   }
 
   void pulse() override
@@ -242,6 +244,7 @@ struct OpenglDisplay : Display
 
 private:
   double m_ambientLight = 0;
+  std::vector<Actor> m_actors;
   SDL_Window* m_window;
   SDL_GLContext m_context;
   GLuint m_font;
@@ -264,25 +267,25 @@ private:
 
   void drawObjects()
   {
-    if(m_shaders.empty() || m_models.empty())
-      return;
+    for(auto& actor : m_actors)
+    {
+      auto& model = m_models[actor.model];
+      int program = m_shaders[actor.shader];
+      CALL(glUseProgram(program));
+      CALL(glBindTexture(GL_TEXTURE_2D, m_font));
+      CALL(glBindBuffer(GL_ARRAY_BUFFER, model.buffer));
 
-    auto& model = m_models[0];
-    int program = m_shaders[0];
-    CALL(glUseProgram(program));
-    CALL(glBindTexture(GL_TEXTURE_2D, m_font));
-    CALL(glBindBuffer(GL_ARRAY_BUFFER, model.buffer));
+      connectAttribute(0, 3, program, "vertexPos");
+      connectAttribute(6, 2, program, "vertexUV");
 
-    connectAttribute(0, 3, program, "vertexPos");
-    connectAttribute(6, 2, program, "vertexUV");
+      // Texture Unit 0: Diffuse
+      CALL(glUniform1i(getUniformIndex(program, "DiffuseTex"), 0));
 
-    // Texture Unit 0: Diffuse
-    CALL(glUniform1i(getUniformIndex(program, "DiffuseTex"), 0));
+      CALL(glDrawArrays(GL_TRIANGLES, 0, model.mesh.vertices.size()));
 
-    CALL(glDrawArrays(GL_TRIANGLES, 0, model.mesh.vertices.size()));
-
-    CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
-    CALL(glBindTexture(GL_TEXTURE_2D, 0));
+      CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+      CALL(glBindTexture(GL_TEXTURE_2D, 0));
+    }
   }
 
   static void connectAttribute(int offset, int size, int program, const char* name)
