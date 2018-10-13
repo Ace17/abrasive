@@ -15,6 +15,7 @@ struct Display
   virtual void update() = 0;
   virtual void showText(const char* msg) = 0;
   virtual void pulse() = 0;
+  virtual void loadShader(int id, const char* path) = 0;
   virtual void loadModel(int id, const char* path) = 0;
   virtual void drawModel(int id, Vec3 pos) = 0;
 };

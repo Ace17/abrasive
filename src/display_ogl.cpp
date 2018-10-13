@@ -4,6 +4,8 @@
 
 #include <memory>
 #include <vector>
+#include <string>
+#include <fstream>
 
 #include "SDL.h"
 
@@ -26,6 +28,7 @@ static void checkGl(const char* caption, const char* file, int line)
 #define CALL(a) \
   do { a; checkGl(# a, __FILE__, __LINE__); } while(0)
 
+static
 GLuint loadTexture(const char* path)
 {
   auto surf = shared_ptr<SDL_Surface>(SDL_LoadBMP(path), &SDL_FreeSurface);
@@ -61,6 +64,90 @@ GLuint loadTexture(const char* path)
   CALL(glBindTexture(GL_TEXTURE_2D, 0));
 
   return 0;
+}
+
+static
+int compileShader(vector<uint8_t> code, int type)
+{
+  auto shaderId = glCreateShader(type);
+
+  if(!shaderId)
+    throw runtime_error("Can't create shader");
+
+  printf("[display] compiling %s shader ... ", (type == GL_VERTEX_SHADER ? "vertex" : "fragment"));
+  auto srcPtr = (const char*)code.data();
+  auto length = (GLint)code.size();
+  CALL(glShaderSource(shaderId, 1, &srcPtr, &length));
+  CALL(glCompileShader(shaderId));
+
+  // Check compile result
+  GLint Result;
+  CALL(glGetShaderiv(shaderId, GL_COMPILE_STATUS, &Result));
+
+  if(!Result)
+  {
+    int logLength;
+    glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &logLength);
+    vector<char> msg(logLength);
+    glGetShaderInfoLog(shaderId, logLength, nullptr, msg.data());
+    fprintf(stderr, "%s\n", msg.data());
+
+    throw runtime_error("Can't compile shader");
+  }
+
+  printf("OK\n");
+
+  return shaderId;
+}
+
+static
+int linkShaders(vector<int> ids)
+{
+  // Link the program
+  printf("[display] Linking shaders ... ");
+  auto ProgramID = glCreateProgram();
+
+  for(auto id : ids)
+    glAttachShader(ProgramID, id);
+
+  glLinkProgram(ProgramID);
+
+  // Check the program
+  GLint Result = GL_FALSE;
+  glGetProgramiv(ProgramID, GL_LINK_STATUS, &Result);
+
+  if(!Result)
+  {
+    int logLength;
+    glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &logLength);
+    vector<char> msg(logLength);
+    glGetProgramInfoLog(ProgramID, logLength, nullptr, msg.data());
+    fprintf(stderr, "%s\n", msg.data());
+
+    throw runtime_error("Can't link shader");
+  }
+
+  printf("OK\n");
+
+  return ProgramID;
+}
+
+static
+vector<uint8_t> load(const char* path)
+{
+  auto fp = ifstream(path, ios::binary);
+
+  if(!fp.is_open())
+    Fail("Can't load file: '%s'", path);
+
+  fp.seekg(0, ios::end);
+  auto size = fp.tellg();
+  fp.seekg(0, ios::beg);
+
+  vector<uint8_t> buf(size);
+  fp.read((char*)buf.data(), buf.size());
+
+  return buf;
 }
 
 struct OpenglDisplay : Display
@@ -118,6 +205,25 @@ struct OpenglDisplay : Display
     printf("%s\n", msg);
   }
 
+  void loadShader(int id, const char* path)
+  {
+    string basePath = path;
+    auto VertexShaderCode = load((basePath + "/vertex.glsl").c_str());
+    auto FragmentShaderCode = load((basePath + "/fragment.glsl").c_str());
+    auto const vertexId = compileShader(VertexShaderCode, GL_VERTEX_SHADER);
+    auto const fragmentId = compileShader(FragmentShaderCode, GL_FRAGMENT_SHADER);
+
+    auto const progId = linkShaders({ vertexId, fragmentId });
+
+    CALL(glDeleteShader(vertexId));
+    CALL(glDeleteShader(fragmentId));
+
+    if(id >= m_shaders.size())
+      m_shaders.resize(id + 1);
+
+    m_shaders[id] = progId;
+  }
+
   void loadModel(int id, const char* path) override
   {
     if(id >= m_meshes.size())
@@ -141,6 +247,7 @@ private:
   SDL_GLContext m_context;
   GLuint m_font;
   vector<Mesh> m_meshes;
+  vector<GLuint> m_shaders;
 };
 
 unique_ptr<Display> createDisplay()

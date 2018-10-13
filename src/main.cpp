@@ -50,6 +50,7 @@ struct State
     m_display(createDisplay()),
     m_audio(createAudio("assets/music.pcm"))
   {
+    m_display->loadShader(0, "assets/shaders/basic");
     m_display->loadModel(0, "assets/meshes/box.mesh");
   }
 
