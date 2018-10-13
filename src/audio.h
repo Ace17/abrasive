@@ -8,5 +8,5 @@ struct Audio
   virtual double getTime() = 0;
 };
 
-std::unique_ptr<Audio> createAudio();
+std::unique_ptr<Audio> createAudio(const char* musicPath);
 

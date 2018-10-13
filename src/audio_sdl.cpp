@@ -9,9 +9,9 @@ using namespace std;
 
 struct SdlAudio : Audio
 {
-  SdlAudio()
+  SdlAudio(const char* musicPath)
   {
-    m_music = load("assets/music.pcm");
+    m_music = load(musicPath);
 
     if(SDL_InitSubSystem(SDL_INIT_AUDIO))
       Fail("Can't init audio");
@@ -105,8 +105,8 @@ private:
   static auto const SAMPLERATE = 22050;
 };
 
-unique_ptr<Audio> createAudio()
+unique_ptr<Audio> createAudio(const char* musicPath)
 {
-  return make_unique<SdlAudio>();
+  return make_unique<SdlAudio>(musicPath);
 }
 

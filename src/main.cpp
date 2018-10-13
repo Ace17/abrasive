@@ -48,7 +48,7 @@ struct State
 {
   State() :
     m_display(createDisplay()),
-    m_audio(createAudio())
+    m_audio(createAudio("assets/music.pcm"))
   {
     m_display->loadModel(0, "assets/meshes/box.mesh");
   }
