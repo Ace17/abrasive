@@ -24,9 +24,12 @@ clean:
 
 $(BIN)/%.cpp.o: %.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -c -o "$@" $^
+	@$(CXX) $(CXXFLAGS) -c $< -MM -MP -MT "$@" -o "$(BIN)/$*.dep"
+	$(CXX) $(CXXFLAGS) -c -o "$@" $<
 
 $(BIN)/%.exe:
 	@mkdir -p $(dir $@)
 	$(CXX) $(LDFLAGS) -o "$@" $^
+
+include $(shell test -d $(BIN) && find $(BIN) -name '*.dep')
 

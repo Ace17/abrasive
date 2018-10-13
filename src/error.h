@@ -1,7 +1,8 @@
 #pragma once
 
-#include "stdarg.h"
-#include "stdio.h"
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 static
 void Fail(const char* fmt, ...)
