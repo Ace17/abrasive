@@ -8,6 +8,19 @@
 #define GL_GLEXT_PROTOTYPES 1
 #include "GL/gl.h"
 
+static void checkGl(const char* caption, const char* file, int line)
+{
+#ifndef NDEBUG
+  auto errorCode = glGetError();
+
+  if(errorCode != GL_NO_ERROR)
+    Fail("[%s:%d] %s returned %d\n", file, line, caption, errorCode);
+#endif
+}
+
+#define CALL(a) \
+  do { a; checkGl(# a, __FILE__, __LINE__); } while(0)
+
 using namespace std;
 
 GLuint loadTexture(const char* path)
@@ -18,8 +31,8 @@ GLuint loadTexture(const char* path)
     Fail("Can't load texture '%s'", path);
 
   GLuint texture;
-  glGenTextures(1, &texture);
-  glBindTexture(GL_TEXTURE_2D, texture);
+  CALL(glGenTextures(1, &texture));
+  CALL(glBindTexture(GL_TEXTURE_2D, texture));
 
   auto const WIDTH = 256;
   auto const HEIGHT = 256;
@@ -37,12 +50,12 @@ GLuint loadTexture(const char* path)
     dst += ROW_SIZE;
   }
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, upsideDownBuffer.data());
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glBindTexture(GL_TEXTURE_2D, 0);
+  CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, upsideDownBuffer.data()));
+  CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+  CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+  CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+  CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+  CALL(glBindTexture(GL_TEXTURE_2D, 0));
 
   return 0;
 }
@@ -92,8 +105,8 @@ struct OpenglDisplay : Display
   {
     m_ambientLight *= 0.97;
 
-    glClearColor(m_ambientLight, m_ambientLight, m_ambientLight, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
+    CALL(glClearColor(m_ambientLight, m_ambientLight, m_ambientLight, 1));
+    CALL(glClear(GL_COLOR_BUFFER_BIT));
     SDL_GL_SwapWindow(m_window);
   }
 
