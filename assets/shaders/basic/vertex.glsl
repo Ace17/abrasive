@@ -9,9 +9,12 @@ in vec2 vertexUV;
 out vec2 UV;
 out vec3 vNormal;
 
+// Values that stay constant for the whole mesh.
+uniform mat4 MVP;
+
 void main()
 {
-  gl_Position = vec4(vertexPos, 1);
+  gl_Position = MVP * vec4(vertexPos, 1);
   UV = vertexUV;
   vNormal = vertexNormal;
 }

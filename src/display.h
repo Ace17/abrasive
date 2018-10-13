@@ -1,13 +1,7 @@
 #pragma once
 
+#include "vec3.h"
 #include <memory>
-
-struct Vec3
-{
-  float x = 0;
-  float y = 0;
-  float z = 0;
-};
 
 struct Actor
 {

@@ -2,6 +2,7 @@
 #include "error.h"
 #include "file.h"
 #include "mesh.h"
+#include "mat4.h"
 
 #include <memory>
 #include <vector>
@@ -267,11 +268,31 @@ private:
 
   void drawObjects()
   {
+    static const float fovy = (float)((60.0f / 180) * M_PI);
+    static const float aspect = 1.0f;
+    static const float near_ = 0.1f;
+    static const float far_ = 100.0f;
+    static const auto perspective = ::perspective(fovy, aspect, near_, far_);
+
     for(auto& actor : m_actors)
     {
       auto& model = m_models[actor.model];
       int program = m_shaders[actor.shader];
       CALL(glUseProgram(program));
+
+      {
+        auto const cameraPos = Vec3 { 3, 3, 5 };
+        auto const cameraTarget = Vec3 { 0, 0, 0 };
+        auto const cameraUp = Vec3 { 0, 1, 0 };
+        auto const view = ::lookAt(cameraPos, cameraTarget, cameraUp);
+        auto const pos = ::translate(actor.pos);
+
+        auto mat = perspective * view * pos;
+
+        auto mvp = getUniformIndex(program, "MVP");
+        CALL(glUniformMatrix4fv(mvp, 1, GL_FALSE, &mat[0][0]));
+      }
+
       CALL(glBindTexture(GL_TEXTURE_2D, m_font));
       CALL(glBindBuffer(GL_ARRAY_BUFFER, model.buffer));
 
