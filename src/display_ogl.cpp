@@ -1,11 +1,11 @@
 #include "display.h"
 #include "error.h"
+#include "file.h"
 #include "mesh.h"
 
 #include <memory>
 #include <vector>
 #include <string>
-#include <fstream>
 
 #include "SDL.h"
 
@@ -132,24 +132,6 @@ int linkShaders(vector<int> ids)
   return ProgramID;
 }
 
-static
-vector<uint8_t> load(const char* path)
-{
-  auto fp = ifstream(path, ios::binary);
-
-  if(!fp.is_open())
-    Fail("Can't load file: '%s'", path);
-
-  fp.seekg(0, ios::end);
-  auto size = fp.tellg();
-  fp.seekg(0, ios::beg);
-
-  vector<uint8_t> buf(size);
-  fp.read((char*)buf.data(), buf.size());
-
-  return buf;
-}
-
 struct OpenglDisplay : Display
 {
   OpenglDisplay()
@@ -208,8 +190,8 @@ struct OpenglDisplay : Display
   void loadShader(int id, const char* path)
   {
     string basePath = path;
-    auto VertexShaderCode = load((basePath + "/vertex.glsl").c_str());
-    auto FragmentShaderCode = load((basePath + "/fragment.glsl").c_str());
+    auto VertexShaderCode = load<uint8_t>((basePath + "/vertex.glsl").c_str());
+    auto FragmentShaderCode = load<uint8_t>((basePath + "/fragment.glsl").c_str());
     auto const vertexId = compileShader(VertexShaderCode, GL_VERTEX_SHADER);
     auto const fragmentId = compileShader(FragmentShaderCode, GL_FRAGMENT_SHADER);
 

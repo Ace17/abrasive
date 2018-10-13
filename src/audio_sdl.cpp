@@ -1,7 +1,8 @@
 #include "audio.h"
 #include "error.h"
+#include "file.h"
+
 #include <vector>
-#include <fstream>
 #include <atomic>
 #include "SDL.h"
 
@@ -11,7 +12,7 @@ struct SdlAudio : Audio
 {
   SdlAudio(const char* musicPath)
   {
-    m_music = load(musicPath);
+    m_music = load<int16_t>(musicPath);
 
     if(SDL_InitSubSystem(SDL_INIT_AUDIO))
       Fail("Can't init audio");
@@ -52,25 +53,6 @@ private:
   int m_musicPos = 0;
 
   std::atomic<int64_t> m_timeInSamples; // incremented at each audio callback
-
-  static
-  vector<int16_t> load(const char* path)
-  {
-    auto fp = ifstream(path, ios::binary);
-
-    if(!fp.is_open())
-      Fail("Can't open music file: '%s'", path);
-
-    fp.seekg(0, ios::end);
-    auto size = fp.tellg();
-    fp.seekg(0, ios::beg);
-
-    vector<int16_t> buf;
-    buf.resize(size / sizeof(int16_t));
-    fp.read((char*)buf.data(), buf.size() * sizeof(int16_t));
-
-    return buf;
-  }
 
   static void staticMixAudio(void* userParam, Uint8* buffer, int size)
   {

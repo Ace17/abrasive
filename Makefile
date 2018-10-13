@@ -7,6 +7,7 @@ all: $(BIN)/rel/abrasive.$(EXT)
 SRCS:=\
 	src/main.cpp\
 	src/mesh.cpp\
+	src/file.cpp\
 	src/audio_sdl.cpp\
 	src/display_ogl.cpp\
 
