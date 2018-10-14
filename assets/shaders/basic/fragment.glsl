@@ -28,11 +28,11 @@ void main()
   float attenuation = 1.0 / (dist*dist);
   light += max(0.0, dot(toLight, worldNormal)) * intensity * attenuation;
 
-  // contribution from the lightmap
-  light += 0.001 * length(texture2D(LightmapTex, UV2).xyz);
-
   // contribution from the ambient light
   light += AmbientLight;
+
+  // contribution from the lightmap
+  light *= length(texture2D(LightmapTex, UV2).xyz);
 
   color = vec4(texture2D(DiffuseTex, UV).rgb * light, 1);
 }

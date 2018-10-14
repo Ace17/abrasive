@@ -74,6 +74,7 @@ def run():
 
   # Set bake margins
   bpy.context.scene.render.bake_margin = 2
+  bpy.context.scene.render.use_textures = False
 
   # Set the UV coordinates
   ob.uv_textures['DiffuseUV'].active_render = True
