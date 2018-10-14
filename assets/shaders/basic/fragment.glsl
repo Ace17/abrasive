@@ -32,7 +32,7 @@ void main()
   light += AmbientLight;
 
   // contribution from the lightmap
-  light *= length(texture2D(LightmapTex, UV2).xyz);
+  light += 0.02 * length(texture2D(LightmapTex, UV2).xyz);
 
   color = vec4(texture2D(DiffuseTex, UV).rgb * light, 1);
 }

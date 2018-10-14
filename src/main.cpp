@@ -6,53 +6,23 @@
 // =============================================================================
 #include <cstdio>
 #include <cstdint>
-#include <vector>
 #include <memory>
-#include <cmath>
 
 #include "audio.h"
 #include "display.h"
+#include "scene.h"
 
 using namespace std;
 
+template<typename T, size_t N>
+size_t ArrayLength(T const (&)[N]) { return N; }
+
+static const char* playlist[] =
+{
+  "init",
+};
+
 auto const BPM = 72.5;
-
-enum
-{
-  MODEL_BOX,
-  MODEL_ROOM,
-};
-
-enum
-{
-  SHADER_BASIC,
-};
-
-struct Event
-{
-  double clockTime; // in beats
-  const char* text = "";
-};
-
-const vector<Event> timeline =
-{
-  { 0.00, "0 - Start" },
-  { 4.00, "4 - " },
-  { 8.00, "8 - " },
-  { 12.00, "8 - " },
-  { 16.00, "16 - Bass starts" },
-  { 18.00, "18 - " },
-  { 20.00, "20 - " },
-  { 22.00, "22 - " },
-  { 24.00, "24 - " },
-  { 26.00, "26 - " },
-  { 28.00, "28 - " },
-  { 30.00, "30 - " },
-  { 32.00, "32 - Drumkit is rolling" },
-  { 48.00, "48 - Saw FX" },
-  { 64.00, "64 - Breakdown Sawtooth porta" },
-  { 96.00, "96 - End" },
-};
 
 // in beats
 double getClock(double seconds)
@@ -62,83 +32,36 @@ double getClock(double seconds)
 
 struct State
 {
-  State() :
+  State(int sceneIndex) :
+    m_sceneIndex(sceneIndex),
     m_display(createDisplay()),
     m_audio(createAudio("assets/music.pcm"))
   {
     m_display->loadShader(SHADER_BASIC, "assets/shaders/basic");
     m_display->loadModel(MODEL_BOX, "assets/meshes/box.mesh");
     m_display->loadModel(MODEL_ROOM, "assets/meshes/room.mesh");
-    m_display->setCamera(m_pos, { 0, 1, 0 }, { 0, 0, 1 });
   }
 
   void tick()
   {
-    updateState();
-    pushActors();
-  }
+    auto clock = getClock(m_audio->getTime());
 
-  void updateState()
-  {
-    auto now = getClock(m_audio->getTime());
-
-    while(curr + 1 < (int)timeline.size() && now >= timeline[curr + 1].clockTime)
+    if(!m_scene)
     {
-      curr++;
-      m_display->showText(timeline[curr].text);
-
-      if(now >= 16)
-        m_display->pulse();
+      auto sceneName = playlist[m_sceneIndex % ArrayLength(playlist)];
+      m_scene = createScene(sceneName, m_display.get());
     }
 
-    Vec3 lightPos;
-    lightPos.x = cos(now * 2.0 * M_PI * 0.25) * 3.0;
-    lightPos.y = sin(now * 2.0 * M_PI * 0.25) * 3.0;
-    lightPos.z = 0.0;
-    m_display->setLightPos(lightPos);
-
-    if(now >= 16)
+    if(!m_scene->tick(clock))
     {
-      m_pos = m_pos + Vec3 { 0, 0.06, 0 };
-      auto t = now - 16;
-      Vec3 up;
-      up.x = sin(t * 0.1);
-      up.y = 0;
-      up.z = cos(t * 0.1);
-
-      m_display->setAmbientLight((now - 16) * 0.01);
-      m_display->setCamera(m_pos, { 0, 1, 0 }, up);
+      m_sceneIndex++;
+      m_scene.reset();
     }
-
-    if(0)
-      m_display->setAmbientLight(0.5);
-  }
-
-  void pushActors()
-  {
-    if(0)
-    {
-      Actor actor;
-      actor.pos = { 3, 0, 0 };
-      actor.model = MODEL_BOX;
-      actor.shader = SHADER_BASIC;
-      m_display->pushActor(actor);
-    }
-
-    {
-      Actor actor;
-      actor.model = MODEL_ROOM;
-      actor.shader = SHADER_BASIC;
-      m_display->pushActor(actor);
-    }
-
-    m_display->update();
   }
 
 private:
-  int curr = -1;
-
-  Vec3 m_pos = { 0, -5, 0 };
+  int m_sceneIndex = 0;
+  unique_ptr<Scene> m_scene;
   unique_ptr<Display> m_display;
   unique_ptr<Audio> m_audio;
 };
@@ -150,10 +73,10 @@ private:
 
 static unique_ptr<State> g_state;
 
-void init()
+void init(int sceneIndex)
 {
   SDL_InitSubSystem(SDL_INIT_EVENTS);
-  g_state = make_unique<State>();
+  g_state = make_unique<State>(sceneIndex);
 }
 
 void destroy()
@@ -165,9 +88,14 @@ void destroy()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int main()
+int main(int argc, char* argv[])
 {
-  init();
+  int sceneIndex = 0;
+
+  if(argc > 2)
+    sceneIndex = atoi(argv[1]);
+
+  init(sceneIndex);
 
   bool keepGoing = true;
 

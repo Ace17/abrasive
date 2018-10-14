@@ -10,8 +10,12 @@ SRCS:=\
 	src/main.cpp\
 	src/mesh.cpp\
 	src/file.cpp\
+	src/scene.cpp\
 	src/audio_sdl.cpp\
 	src/display_ogl.cpp\
+
+# Scenes
+SRCS+=src/scene_init.cpp
 
 CXXFLAGS+=$(shell pkg-config gl sdl2 --cflags)
 LDFLAGS+=$(shell pkg-config gl sdl2 --libs)
