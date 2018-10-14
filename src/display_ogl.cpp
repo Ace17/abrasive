@@ -246,6 +246,7 @@ struct OpenglDisplay : Display
   }
 
 private:
+  float m_aspectRatio = 1.0f;
   double m_ambientLight = 0;
   std::vector<Actor> m_actors;
   SDL_Window* m_window;
@@ -265,16 +266,16 @@ private:
   {
     int width, height;
     SDL_GL_GetDrawableSize(m_window, &width, &height);
+    m_aspectRatio = (float)width / height;
     CALL(glViewport(0, 0, width, height));
   }
 
   void drawObjects()
   {
     static const float fovy = (float)((60.0f / 180) * M_PI);
-    static const float aspect = 1.0f;
     static const float near_ = 0.1f;
     static const float far_ = 100.0f;
-    static const auto perspective = ::perspective(fovy, aspect, near_, far_);
+    const auto perspective = ::perspective(fovy, m_aspectRatio, near_, far_);
 
     static float phase = 0;
     phase += 0.01;
