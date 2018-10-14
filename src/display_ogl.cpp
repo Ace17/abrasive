@@ -171,6 +171,8 @@ struct OpenglDisplay : Display
     GLuint vertexArray;
     CALL(glGenVertexArrays(1, &vertexArray));
     CALL(glBindVertexArray(vertexArray));
+
+    CALL(glEnable(GL_DEPTH_TEST));
   }
 
   ~OpenglDisplay()
@@ -187,7 +189,7 @@ struct OpenglDisplay : Display
     updateViewport();
 
     CALL(glClearColor(m_ambientLight, m_ambientLight, m_ambientLight, 1));
-    CALL(glClear(GL_COLOR_BUFFER_BIT));
+    CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
     drawObjects();
 
@@ -274,6 +276,14 @@ private:
     static const float far_ = 100.0f;
     static const auto perspective = ::perspective(fovy, aspect, near_, far_);
 
+    static float phase = 0;
+    phase += 0.01;
+
+    auto const cameraPos = Vec3 { cos(phase) * 3, sin(phase) * 3, 5 };
+    auto const cameraTarget = Vec3 { 0, 0, 0 };
+    auto const cameraUp = Vec3 { 0, 1, 0 };
+    auto const view = ::lookAt(cameraPos, cameraTarget, cameraUp);
+
     for(auto& actor : m_actors)
     {
       auto& model = m_models[actor.model];
@@ -281,12 +291,7 @@ private:
       CALL(glUseProgram(program));
 
       {
-        auto const cameraPos = Vec3 { 3, 3, 5 };
-        auto const cameraTarget = Vec3 { 0, 0, 0 };
-        auto const cameraUp = Vec3 { 0, 1, 0 };
-        auto const view = ::lookAt(cameraPos, cameraTarget, cameraUp);
         auto const pos = ::translate(actor.pos);
-
         auto mat = perspective * view * pos;
 
         auto mvp = getUniformIndex(program, "MVP");

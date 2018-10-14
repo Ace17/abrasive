@@ -182,36 +182,48 @@ def exportMesh(scene, filepath=""):
     # make a mesh chunk out of the mesh:
     dumpMesh(blender_mesh, filepath)
 
+class Vertex(object):
+    def __init__(self, pos, uv):
+        self.pos = pos
+        self.uv = uv
+
 class Triangle(object):
-    def __init__(self, abc, faceuvs=None):
-        self.abc = abc
-        self.faceuvs = faceuvs
+    def __init__(self, a, b, c):
+        self.a = a
+        self.b = b
+        self.c = c
 
 def extractTriangles(mesh):
-    vertices = []
     assert(mesh.tessface_uv_textures)
 
+    vertices = []
     for k in mesh.vertices.values():
         vertices.append(k)
 
     triangles = []
     for i, face in enumerate(mesh.tessfaces):
-        indices = face.vertices
+        idx = face.vertices
         uv = mesh.tessface_uv_textures.active.data[i].uv
 
-        if len(indices) == 3:
-            triangles.append(buildTriangle(vertices, indices[0], indices[1], indices[2]))
+        if len(idx) == 3:
+            triangles.append(Triangle(
+                Vertex(vertices[idx[0]].co, uv[0]),
+                Vertex(vertices[idx[1]].co, uv[1]),
+                Vertex(vertices[idx[2]].co, uv[2])
+                ))
         else:  # it's a quad
-            triangles.append(buildTriangle(vertices, indices[0], indices[1], indices[2]))
-            triangles.append(buildTriangle(vertices, indices[0], indices[2], indices[3]))
+            triangles.append(Triangle(
+                Vertex(vertices[idx[0]].co, uv[0]),
+                Vertex(vertices[idx[1]].co, uv[1]),
+                Vertex(vertices[idx[2]].co, uv[2])
+                ))
+            triangles.append(Triangle(
+                Vertex(vertices[idx[0]].co, uv[0]),
+                Vertex(vertices[idx[2]].co, uv[2]),
+                Vertex(vertices[idx[3]].co, uv[3])
+                ))
 
     return triangles
-
-def buildTriangle(vertices, i0, i1, i2):
-    v0 = vertices[i0].co
-    v1 = vertices[i1].co
-    v2 = vertices[i2].co
-    return Triangle((v0, v1, v2))
 
 def dumpMesh(mesh, filepath):
     triangles = extractTriangles(mesh)
@@ -222,13 +234,13 @@ def dumpMesh(mesh, filepath):
     file.write("# x y z - nx ny nz - u1 v1 - u2 v2\n")
 
     for tri in triangles:
-        for vertex in tri.abc:
+        for vertex in (tri.a, tri.b, tri.c):
             line = ""
-            line += str(vertex.x)
+            line += str(vertex.pos.x)
             line += " "
-            line += str(vertex.y)
+            line += str(vertex.pos.y)
             line += " "
-            line += str(vertex.z)
+            line += str(vertex.pos.z)
             line += " - "
             line += "1" # nx
             line += " "
@@ -236,9 +248,9 @@ def dumpMesh(mesh, filepath):
             line += " "
             line += "0" # nz
             line += " - "
-            line += str(vertex.x) # u1
+            line += str(round(vertex.uv[0], 2)) # u1
             line += " "
-            line += str(vertex.y) # v1
+            line += str(round(vertex.uv[1], 2)) # v1
             line += " - "
             line += "0" # u2
             line += " "
