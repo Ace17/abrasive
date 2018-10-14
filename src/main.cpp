@@ -70,6 +70,12 @@ struct State
 
   void tick()
   {
+    updateState();
+    pushActors();
+  }
+
+  void updateState()
+  {
     auto now = getClock(m_audio->getTime());
 
     while(curr + 1 < (int)timeline.size() && now >= timeline[curr + 1].clockTime)
@@ -77,21 +83,6 @@ struct State
       curr++;
       m_display->showText(timeline[curr].text);
       m_display->pulse();
-    }
-
-    {
-      Actor actor;
-      actor.pos = { 4, 0, 0 };
-      actor.model = MODEL_BOX;
-      actor.shader = SHADER_BASIC;
-      m_display->pushActor(actor);
-    }
-
-    {
-      Actor actor;
-      actor.model = MODEL_ROOM;
-      actor.shader = SHADER_BASIC;
-      m_display->pushActor(actor);
     }
 
     if(now >= 16)
@@ -105,6 +96,24 @@ struct State
 
       m_display->setAmbientLight(now * 0.001);
       m_display->setCamera(m_pos, { 0, 1, 0 }, up);
+    }
+  }
+
+  void pushActors()
+  {
+    {
+      Actor actor;
+      actor.pos = { 4, 0, 0 };
+      actor.model = MODEL_BOX;
+      actor.shader = SHADER_BASIC;
+      m_display->pushActor(actor);
+    }
+
+    {
+      Actor actor;
+      actor.model = MODEL_ROOM;
+      actor.shader = SHADER_BASIC;
+      m_display->pushActor(actor);
     }
 
     m_display->update();
