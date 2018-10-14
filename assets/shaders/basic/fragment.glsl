@@ -25,7 +25,8 @@ void main()
   float dist = length(LightPos - worldPos);
   float intensity = 1.0;
   vec3 toLight = normalize(LightPos - worldPos);
-  light += max(0.0, dot(toLight, worldNormal)) * intensity / (dist*dist);
+  float attenuation = 1.0 / (dist*dist);
+  light += max(0.0, dot(toLight, worldNormal)) * intensity * attenuation;
 
   // contribution from the lightmap
   light += 0.001 * length(texture2D(LightmapTex, UV2).xyz);

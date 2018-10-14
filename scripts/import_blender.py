@@ -214,20 +214,20 @@ def extractTriangles(mesh):
 
         if len(idx) == 3:
             triangles.append(Triangle(
-                Vertex(vertices[idx[0]].co, vertices[idx[0]].normal, uv1[0], uv2[0]),
-                Vertex(vertices[idx[1]].co, vertices[idx[1]].normal, uv1[1], uv2[1]),
-                Vertex(vertices[idx[2]].co, vertices[idx[2]].normal, uv1[2], uv2[2])
+                Vertex(vertices[idx[0]].co, face.normal, uv1[0], uv2[0]),
+                Vertex(vertices[idx[1]].co, face.normal, uv1[1], uv2[1]),
+                Vertex(vertices[idx[2]].co, face.normal, uv1[2], uv2[2])
                 ))
         else:  # it's a quad
             triangles.append(Triangle(
-                Vertex(vertices[idx[0]].co, vertices[idx[0]].normal, uv1[0], uv2[0]),
-                Vertex(vertices[idx[1]].co, vertices[idx[1]].normal, uv1[1], uv2[1]),
-                Vertex(vertices[idx[2]].co, vertices[idx[2]].normal, uv1[2], uv2[2])
+                Vertex(vertices[idx[0]].co, face.normal, uv1[0], uv2[0]),
+                Vertex(vertices[idx[1]].co, face.normal, uv1[1], uv2[1]),
+                Vertex(vertices[idx[2]].co, face.normal, uv1[2], uv2[2])
                 ))
             triangles.append(Triangle(
-                Vertex(vertices[idx[0]].co, vertices[idx[0]].normal, uv1[0], uv2[0]),
-                Vertex(vertices[idx[2]].co, vertices[idx[2]].normal, uv1[2], uv2[2]),
-                Vertex(vertices[idx[3]].co, vertices[idx[3]].normal, uv1[3], uv2[3])
+                Vertex(vertices[idx[0]].co, face.normal, uv1[0], uv2[0]),
+                Vertex(vertices[idx[2]].co, face.normal, uv1[2], uv2[2]),
+                Vertex(vertices[idx[3]].co, face.normal, uv1[3], uv2[3])
                 ))
 
     return triangles
