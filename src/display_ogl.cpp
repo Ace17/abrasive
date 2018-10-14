@@ -257,6 +257,11 @@ struct OpenglDisplay : Display
     m_ambientLight = value;
   }
 
+  void setLightPos(Vec3 pos) override
+  {
+    m_lightPos = pos;
+  }
+
   void setCamera(Vec3 pos, Vec3 forward, Vec3 up) override
   {
     m_cameraPos = pos;
@@ -268,6 +273,7 @@ private:
   float m_aspectRatio = 1.0f;
   double m_ambientLight = 0;
   double m_pulseLight = 0;
+  Vec3 m_lightPos;
   Vec3 m_cameraPos, m_cameraFwd, m_cameraUp;
   std::vector<Actor> m_actors;
   SDL_Window* m_window;
@@ -309,9 +315,19 @@ private:
       CALL(glUseProgram(program));
 
       CALL(glUniform1f(getUniformIndex(program, "AmbientLight"), m_ambientLight + m_pulseLight));
+      CALL(glUniform3f(getUniformIndex(program, "LightPos"),
+                       m_lightPos.x,
+                       m_lightPos.y,
+                       m_lightPos.z));
 
       {
         auto const pos = ::translate(actor.pos);
+
+        {
+          auto mvp = getUniformIndex(program, "M");
+          CALL(glUniformMatrix4fv(mvp, 1, GL_FALSE, &pos[0][0]));
+        }
+
         auto mat = perspective * view * pos;
 
         auto mvp = getUniformIndex(program, "MVP");
@@ -321,6 +337,7 @@ private:
       CALL(glBindBuffer(GL_ARRAY_BUFFER, model.vbo));
 
       connectAttribute(0, 3, program, "vertexPos");
+      connectAttribute(3, 3, program, "vertexNormal");
       connectAttribute(6, 2, program, "vertexUV");
       connectAttribute(8, 2, program, "vertexUV2");
 

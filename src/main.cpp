@@ -86,8 +86,16 @@ struct State
     {
       curr++;
       m_display->showText(timeline[curr].text);
-      m_display->pulse();
+
+      if(now >= 16)
+        m_display->pulse();
     }
+
+    Vec3 lightPos;
+    lightPos.x = cos(now * 2.0 * M_PI * 0.25) * 3.0;
+    lightPos.y = sin(now * 2.0 * M_PI * 0.25) * 3.0;
+    lightPos.z = 0.0;
+    m_display->setLightPos(lightPos);
 
     if(now >= 16)
     {
@@ -98,7 +106,7 @@ struct State
       up.y = 0;
       up.z = cos(t * 0.1);
 
-      m_display->setAmbientLight(now * 0.001);
+      m_display->setAmbientLight((now - 16) * 0.01);
       m_display->setCamera(m_pos, { 0, 1, 0 }, up);
     }
 
@@ -108,9 +116,10 @@ struct State
 
   void pushActors()
   {
+    if(0)
     {
       Actor actor;
-      actor.pos = { 4, 0, 0 };
+      actor.pos = { 3, 0, 0 };
       actor.model = MODEL_BOX;
       actor.shader = SHADER_BASIC;
       m_display->pushActor(actor);

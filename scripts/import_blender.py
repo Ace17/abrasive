@@ -183,8 +183,9 @@ def exportMesh(scene, filepath=""):
     dumpMesh(blender_mesh, filepath)
 
 class Vertex(object):
-    def __init__(self, pos, uv1, uv2):
+    def __init__(self, pos, normal, uv1, uv2):
         self.pos = pos
+        self.normal = normal
         self.uv1 = uv1
         self.uv2 = uv2
 
@@ -213,20 +214,20 @@ def extractTriangles(mesh):
 
         if len(idx) == 3:
             triangles.append(Triangle(
-                Vertex(vertices[idx[0]].co, uv1[0], uv2[0]),
-                Vertex(vertices[idx[1]].co, uv1[1], uv2[1]),
-                Vertex(vertices[idx[2]].co, uv1[2], uv2[2])
+                Vertex(vertices[idx[0]].co, vertices[idx[0]].normal, uv1[0], uv2[0]),
+                Vertex(vertices[idx[1]].co, vertices[idx[1]].normal, uv1[1], uv2[1]),
+                Vertex(vertices[idx[2]].co, vertices[idx[2]].normal, uv1[2], uv2[2])
                 ))
         else:  # it's a quad
             triangles.append(Triangle(
-                Vertex(vertices[idx[0]].co, uv1[0], uv2[0]),
-                Vertex(vertices[idx[1]].co, uv1[1], uv2[1]),
-                Vertex(vertices[idx[2]].co, uv1[2], uv2[2])
+                Vertex(vertices[idx[0]].co, vertices[idx[0]].normal, uv1[0], uv2[0]),
+                Vertex(vertices[idx[1]].co, vertices[idx[1]].normal, uv1[1], uv2[1]),
+                Vertex(vertices[idx[2]].co, vertices[idx[2]].normal, uv1[2], uv2[2])
                 ))
             triangles.append(Triangle(
-                Vertex(vertices[idx[0]].co, uv1[0], uv2[0]),
-                Vertex(vertices[idx[2]].co, uv1[2], uv2[2]),
-                Vertex(vertices[idx[3]].co, uv1[3], uv2[3])
+                Vertex(vertices[idx[0]].co, vertices[idx[0]].normal, uv1[0], uv2[0]),
+                Vertex(vertices[idx[2]].co, vertices[idx[2]].normal, uv1[2], uv2[2]),
+                Vertex(vertices[idx[3]].co, vertices[idx[3]].normal, uv1[3], uv2[3])
                 ))
 
     return triangles
@@ -248,19 +249,19 @@ def dumpMesh(mesh, filepath):
             line += " "
             line += str(round(vertex.pos.z, 6))
             line += " - "
-            line += "1" # nx
+            line += str(round(vertex.normal.x, 2))
             line += " "
-            line += "0" # ny
+            line += str(round(vertex.normal.y, 2))
             line += " "
-            line += "0" # nz
+            line += str(round(vertex.normal.z, 2))
             line += " - "
-            line += str(round(vertex.uv1[0], 2)) # u1
+            line += str(round(vertex.uv1[0], 6)) # u1
             line += " "
-            line += str(round(vertex.uv1[1], 2)) # v1
+            line += str(round(vertex.uv1[1], 6)) # v1
             line += " - "
-            line += str(round(vertex.uv2[0], 2)) # u1
+            line += str(round(vertex.uv2[0], 6)) # u1
             line += " "
-            line += str(round(vertex.uv2[1], 2)) # v1
+            line += str(round(vertex.uv2[1], 6)) # v1
             file.write(line + "\n")
         file.write("\n")
 
