@@ -23,7 +23,7 @@ struct BassScene : Scene
 
   void tick(double clock) override
   {
-    if(frac(clock * 0.5) < 0.1)
+    if(frac(clock * 0.5) < 0.01)
       m_display->pulse();
 
     updateState(clock);
@@ -32,15 +32,17 @@ struct BassScene : Scene
 
   void updateState(double now)
   {
-    m_pos = m_pos + Vec3 { 0, 0.06, 0 };
+    Vec3 pos = { 0, -5 + float(now * 2.0), 0 };
     auto t = now;
     Vec3 up;
     up.x = sin(t * 0.1);
     up.y = 0;
     up.z = cos(t * 0.1);
 
+    m_display->setLightPos(pos + Vec3 { 0, float(min(now, 10.0)), 0 });
+
     m_display->setAmbientLight(now * 0.01);
-    m_display->setCamera(m_pos, { 0, 1, 0 }, up);
+    m_display->setCamera(pos, { 0, 1, 0 }, up);
   }
 
   void pushActors()
@@ -54,7 +56,6 @@ struct BassScene : Scene
 private:
   int curr = -1;
 
-  Vec3 m_pos = { 0, -5, 0 };
   Display* const m_display;
 };
 
