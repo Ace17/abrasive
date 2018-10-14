@@ -4,8 +4,7 @@
 
 struct Scene
 {
-  // returns false if the scene is finished
-  virtual bool tick(double clock) = 0;
+  virtual void tick(double clock) = 0;
 };
 
 enum

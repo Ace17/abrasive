@@ -17,16 +17,22 @@ using namespace std;
 template<typename T, size_t N>
 size_t ArrayLength(T const (&)[N]) { return N; }
 
-static const char* playlist[] =
+struct SceneInstance
 {
-  "init",
+  const char* name;
+  double duration; // in beats
 };
 
-auto const BPM = 72.5;
+static const SceneInstance g_scenePlaylist[] =
+{
+  { "init", 16.0 },
+  { "bass", 16.0 },
+};
 
 // in beats
 double getClock(double seconds)
 {
+  static auto const BPM = 72.5;
   return seconds * (BPM / 60);
 }
 
@@ -48,18 +54,35 @@ struct State
 
     if(!m_scene)
     {
-      auto sceneName = playlist[m_sceneIndex % ArrayLength(playlist)];
-      m_scene = createScene(sceneName, m_display.get());
+      auto instance = g_scenePlaylist[m_sceneIndex];
+      m_scene = createScene(instance.name, m_display.get());
+      m_sceneStartTime = clock;
+      printf("Scene: %s\n", instance.name);
     }
 
-    if(!m_scene->tick(clock))
+    m_scene->tick(clock - m_sceneStartTime);
+
+    if(0)
     {
-      m_sceneIndex++;
+      Actor actor;
+      actor.pos = { 3, 0, 0 };
+      actor.model = MODEL_BOX;
+      actor.shader = SHADER_BASIC;
+      m_display->pushActor(actor);
+      m_display->setAmbientLight(0.5);
+    }
+
+    m_display->update();
+
+    if(clock - m_sceneStartTime >= g_scenePlaylist[m_sceneIndex].duration)
+    {
+      m_sceneIndex = (m_sceneIndex + 1) % ArrayLength(g_scenePlaylist);
       m_scene.reset();
     }
   }
 
 private:
+  double m_sceneStartTime = 0;
   int m_sceneIndex = 0;
   unique_ptr<Scene> m_scene;
   unique_ptr<Display> m_display;
@@ -92,7 +115,7 @@ int main(int argc, char* argv[])
 {
   int sceneIndex = 0;
 
-  if(argc > 2)
+  if(argc >= 2)
     sceneIndex = atoi(argv[1]);
 
   init(sceneIndex);

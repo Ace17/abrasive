@@ -20,7 +20,7 @@ int registerScene(std::string name, SceneCreationFunc* func)
 unique_ptr<Scene> createScene(std::string name, Display* display)
 {
   if(g_scenes.find(name) == g_scenes.end())
-    Fail("unknown scene '%s'", name);
+    Fail("unknown scene '%s'", name.c_str());
 
   return unique_ptr<Scene>(g_scenes[name] (display));
 }

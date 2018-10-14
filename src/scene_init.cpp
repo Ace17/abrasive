@@ -42,74 +42,35 @@ struct InitScene : Scene
   {
   }
 
-  bool tick(double clock) override
+  void tick(double clock) override
   {
     updateState(clock);
     pushActors();
-    return clock < 32.0;
   }
 
   void updateState(double now)
   {
-    while(now >= 32.0)
-      now -= 32.0;
-
     while(curr + 1 < (int)timeline.size() && now >= timeline[curr + 1].clockTime)
     {
       curr++;
       m_display->showText(timeline[curr].text);
-
-      if(now >= 16)
-        m_display->pulse();
     }
 
-    if(now < 16)
-    {
-      Vec3 lightPos;
-      lightPos.x = cos(now * 2.0 * M_PI * 0.25) * 3.0;
-      lightPos.y = sin(now * 2.0 * M_PI * 0.25) * 3.0;
-      lightPos.z = 0.0;
-      m_display->setAmbientLight(0);
-      m_display->setLightPos(lightPos);
-      m_display->setCamera(m_pos, { 0, 1, 0 }, { 0, 0, 1 });
-    }
-    else
-    {
-      m_pos = m_pos + Vec3 { 0, 0.06, 0 };
-      m_display->setLightPos(m_pos + Vec3 { 0, 1, 0 });
-      auto t = now - 16;
-      Vec3 up;
-      up.x = sin(t * 0.1);
-      up.y = 0;
-      up.z = cos(t * 0.1);
-
-      m_display->setAmbientLight((now - 16) * 0.01);
-      m_display->setCamera(m_pos, { 0, 1, 0 }, up);
-    }
-
-    if(0)
-      m_display->setAmbientLight(0.5);
+    Vec3 lightPos;
+    lightPos.x = cos(now * 2.0 * M_PI * 0.25) * 3.0;
+    lightPos.y = sin(now * 2.0 * M_PI * 0.25) * 3.0;
+    lightPos.z = 0.0;
+    m_display->setAmbientLight(0);
+    m_display->setLightPos(lightPos);
+    m_display->setCamera(m_pos, { 0, 1, 0 }, { 0, 0, 1 });
   }
 
   void pushActors()
   {
-    if(0)
-    {
-      Actor actor;
-      actor.pos = { 3, 0, 0 };
-      actor.model = MODEL_BOX;
-      actor.shader = SHADER_BASIC;
-      m_display->pushActor(actor);
-    }
-
-    {
-      Actor actor;
-      actor.model = MODEL_ROOM;
-      actor.shader = SHADER_BASIC;
-      m_display->pushActor(actor);
-    }
-
-    m_display->update();
+    Actor actor;
+    actor.model = MODEL_ROOM;
+    actor.shader = SHADER_BASIC;
+    m_display->pushActor(actor);
   }
 
 private:
