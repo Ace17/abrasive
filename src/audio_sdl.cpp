@@ -33,6 +33,7 @@ struct SdlAudio : Audio
     fprintf(stderr, "[audio] %d Hz %d ch %d samples (%.2f ms)\n", actual.freq, actual.channels, actual.samples, actual.samples * 1000.0 / double(actual.freq));
 
     m_timeInSamples = -actual.samples;
+    m_timeInTicks = 0;
     SDL_PauseAudio(0);
   }
 
@@ -45,7 +46,7 @@ struct SdlAudio : Audio
 
   double getTime()
   {
-    return m_timeInSamples / double(SAMPLERATE);
+    return m_timeInSamples / double(SAMPLERATE) + (SDL_GetTicks() - m_timeInTicks) / 1000.0;
   }
 
 private:
@@ -53,6 +54,7 @@ private:
   int m_musicPos = 0;
 
   std::atomic<int64_t> m_timeInSamples; // incremented at each audio callback
+  std::atomic<int64_t> m_timeInTicks; // set at each audio callback
 
   static void staticMixAudio(void* userParam, Uint8* buffer, int size)
   {
@@ -81,6 +83,7 @@ private:
     }
 
     m_timeInSamples += deltaTime;
+    m_timeInTicks = SDL_GetTicks();
   }
 
   static auto const CHANNELS = 2;

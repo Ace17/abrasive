@@ -8,24 +8,6 @@
 // Vec3 operations
 
 inline
-Vec3 operator - (Vec3 a, Vec3 b)
-{
-  a.x -= b.x;
-  a.y -= b.y;
-  a.z -= b.z;
-  return a;
-}
-
-inline
-Vec3 operator * (Vec3 v, float f)
-{
-  v.x *= f;
-  v.y *= f;
-  v.z *= f;
-  return v;
-}
-
-inline
 double dotProduct(Vec3 a, Vec3 b)
 {
   return a.x * b.x + a.y * b.y + a.z * b.z;

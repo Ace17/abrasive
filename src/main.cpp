@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <vector>
 #include <memory>
+#include <cmath>
 
 #include "audio.h"
 #include "display.h"
@@ -64,12 +65,12 @@ struct State
     m_display->loadShader(SHADER_BASIC, "assets/shaders/basic");
     m_display->loadModel(MODEL_BOX, "assets/meshes/box.mesh");
     m_display->loadModel(MODEL_ROOM, "assets/meshes/room.mesh");
+    m_display->setCamera(m_pos, { 0, 1, 0 }, { 0, 0, 1 });
   }
 
   void tick()
   {
-    auto seconds = m_audio->getTime();
-    auto now = getClock(seconds);
+    auto now = getClock(m_audio->getTime());
 
     while(curr + 1 < (int)timeline.size() && now >= timeline[curr + 1].clockTime)
     {
@@ -78,9 +79,9 @@ struct State
       m_display->pulse();
     }
 
-    if(int(now) % 2 == 0)
     {
       Actor actor;
+      actor.pos = { 4, 0, 0 };
       actor.model = MODEL_BOX;
       actor.shader = SHADER_BASIC;
       m_display->pushActor(actor);
@@ -94,13 +95,25 @@ struct State
     }
 
     if(now >= 16)
-      m_display->setAmbientLight(now * 0.01);
+    {
+      m_pos = m_pos + Vec3 { 0, 0.06, 0 };
+      auto t = now - 16;
+      Vec3 up;
+      up.x = sin(t * 0.1);
+      up.y = 0;
+      up.z = cos(t * 0.1);
+
+      m_display->setAmbientLight(now * 0.001);
+      m_display->setCamera(m_pos, { 0, 1, 0 }, up);
+    }
+
     m_display->update();
   }
 
 private:
   int curr = -1;
 
+  Vec3 m_pos = { 0, -5, 0 };
   unique_ptr<Audio> m_audio;
   unique_ptr<Display> m_display;
 };

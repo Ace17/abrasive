@@ -257,10 +257,18 @@ struct OpenglDisplay : Display
     m_ambientLight = value;
   }
 
+  void setCamera(Vec3 pos, Vec3 forward, Vec3 up) override
+  {
+    m_cameraPos = pos;
+    m_cameraFwd = forward;
+    m_cameraUp = up;
+  }
+
 private:
   float m_aspectRatio = 1.0f;
   double m_ambientLight = 0;
   double m_pulseLight = 0;
+  Vec3 m_cameraPos, m_cameraFwd, m_cameraUp;
   std::vector<Actor> m_actors;
   SDL_Window* m_window;
   SDL_GLContext m_context;
@@ -292,13 +300,7 @@ private:
     static const float far_ = 100.0f;
     const auto perspective = ::perspective(fovy, m_aspectRatio, near_, far_);
 
-    static float phase = 0;
-    phase += 0.01;
-
-    auto const cameraPos = Vec3 { cos(phase) * 3, sin(phase) * 3, 2 };
-    auto const cameraTarget = Vec3 { 0, 0, 0 };
-    auto const cameraUp = Vec3 { 0, 1, 0 };
-    auto const view = ::lookAt(cameraPos, cameraTarget, cameraUp);
+    auto const view = ::lookAt(m_cameraPos, m_cameraPos + m_cameraFwd, m_cameraUp);
 
     for(auto& actor : m_actors)
     {
