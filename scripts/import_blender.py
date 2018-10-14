@@ -242,11 +242,11 @@ def dumpMesh(mesh, filepath):
     for tri in triangles:
         for vertex in (tri.a, tri.b, tri.c):
             line = ""
-            line += str(vertex.pos.x)
+            line += str(round(vertex.pos.x, 4))
             line += " "
-            line += str(vertex.pos.y)
+            line += str(round(vertex.pos.y, 4))
             line += " "
-            line += str(vertex.pos.z)
+            line += str(round(vertex.pos.z, 4))
             line += " - "
             line += "1" # nx
             line += " "

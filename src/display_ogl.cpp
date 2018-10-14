@@ -167,12 +167,14 @@ struct OpenglDisplay : Display
     SDL_GL_SetSwapInterval(1);
 
     m_font = loadTexture("assets/font.bmp");
+    m_texture = loadTexture("assets/textures/tex1.bmp");
 
     GLuint vertexArray;
     CALL(glGenVertexArrays(1, &vertexArray));
     CALL(glBindVertexArray(vertexArray));
 
     CALL(glEnable(GL_DEPTH_TEST));
+    CALL(glEnable(GL_CULL_FACE));
   }
 
   ~OpenglDisplay()
@@ -252,6 +254,7 @@ private:
   SDL_Window* m_window;
   SDL_GLContext m_context;
   GLuint m_font;
+  GLuint m_texture;
 
   struct Model
   {
@@ -280,7 +283,7 @@ private:
     static float phase = 0;
     phase += 0.01;
 
-    auto const cameraPos = Vec3 { cos(phase) * 3, sin(phase) * 3, 5 };
+    auto const cameraPos = Vec3 { cos(phase) * 3, sin(phase) * 3, 2 };
     auto const cameraTarget = Vec3 { 0, 0, 0 };
     auto const cameraUp = Vec3 { 0, 1, 0 };
     auto const view = ::lookAt(cameraPos, cameraTarget, cameraUp);
@@ -299,7 +302,7 @@ private:
         CALL(glUniformMatrix4fv(mvp, 1, GL_FALSE, &mat[0][0]));
       }
 
-      CALL(glBindTexture(GL_TEXTURE_2D, m_font));
+      CALL(glBindTexture(GL_TEXTURE_2D, m_texture));
       CALL(glBindBuffer(GL_ARRAY_BUFFER, model.buffer));
 
       connectAttribute(0, 3, program, "vertexPos");

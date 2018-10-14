@@ -19,6 +19,7 @@ auto const BPM = 72.5;
 enum
 {
   MODEL_BOX,
+  MODEL_ROOM,
 };
 
 enum
@@ -62,6 +63,7 @@ struct State
   {
     m_display->loadShader(SHADER_BASIC, "assets/shaders/basic");
     m_display->loadModel(MODEL_BOX, "assets/meshes/box.mesh");
+    m_display->loadModel(MODEL_ROOM, "assets/meshes/room.mesh");
   }
 
   void tick()
@@ -80,6 +82,13 @@ struct State
     {
       Actor actor;
       actor.model = MODEL_BOX;
+      actor.shader = SHADER_BASIC;
+      m_display->pushActor(actor);
+    }
+
+    {
+      Actor actor;
+      actor.model = MODEL_ROOM;
       actor.shader = SHADER_BASIC;
       m_display->pushActor(actor);
     }
