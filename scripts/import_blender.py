@@ -57,7 +57,7 @@ def run():
   bpy.data.worlds["World"].light_settings.ao_factor=2.0
   bpy.data.worlds["World"].light_settings.use_environment_light=True
   bpy.data.worlds["World"].light_settings.environment_energy=0.1
-  bpy.data.worlds["World"].light_settings.samples = 15
+  bpy.data.worlds["World"].light_settings.samples = 10
 
   #----------------------------------------------------------------------------
   # baking

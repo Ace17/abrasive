@@ -167,7 +167,7 @@ struct OpenglDisplay : Display
     SDL_GL_SetSwapInterval(1);
 
     m_font = loadTexture("assets/font.bmp");
-    m_texture = loadTexture("assets/textures/tex1.bmp");
+    m_texture = loadTexture("assets/textures/tex2.bmp");
 
     GLuint vertexArray;
     CALL(glGenVertexArrays(1, &vertexArray));
