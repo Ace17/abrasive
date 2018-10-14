@@ -228,8 +228,13 @@ struct OpenglDisplay : Display
     model.mesh = loadMesh(path);
     auto& vertices = model.mesh.vertices;
 
-    CALL(glGenBuffers(1, &model.buffer));
-    CALL(glBindBuffer(GL_ARRAY_BUFFER, model.buffer));
+    {
+      string basePath = path;
+      model.lightmap = loadTexture((basePath + ".lightmap.bmp").c_str());
+    }
+
+    CALL(glGenBuffers(1, &model.vbo));
+    CALL(glBindBuffer(GL_ARRAY_BUFFER, model.vbo));
     CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_STATIC_DRAW));
     CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
 
@@ -259,7 +264,8 @@ private:
   struct Model
   {
     Mesh mesh;
-    GLuint buffer;
+    GLuint vbo;
+    GLuint lightmap;
   };
 
   vector<Model> m_models;
@@ -302,14 +308,21 @@ private:
         CALL(glUniformMatrix4fv(mvp, 1, GL_FALSE, &mat[0][0]));
       }
 
-      CALL(glBindTexture(GL_TEXTURE_2D, m_texture));
-      CALL(glBindBuffer(GL_ARRAY_BUFFER, model.buffer));
+      CALL(glBindBuffer(GL_ARRAY_BUFFER, model.vbo));
 
       connectAttribute(0, 3, program, "vertexPos");
       connectAttribute(6, 2, program, "vertexUV");
+      connectAttribute(8, 2, program, "vertexUV2");
 
       // Texture Unit 0: Diffuse
+      CALL(glActiveTexture(GL_TEXTURE0));
+      CALL(glBindTexture(GL_TEXTURE_2D, m_texture));
       CALL(glUniform1i(getUniformIndex(program, "DiffuseTex"), 0));
+
+      // Texture Unit 1: Lightmap
+      CALL(glActiveTexture(GL_TEXTURE1));
+      CALL(glBindTexture(GL_TEXTURE_2D, model.lightmap));
+      CALL(glUniform1i(getUniformIndex(program, "LightmapTex"), 1));
 
       CALL(glDrawArrays(GL_TRIANGLES, 0, model.mesh.vertices.size()));
 
