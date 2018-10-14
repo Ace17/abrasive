@@ -40,10 +40,14 @@ const vector<Event> timeline =
   { 4.00, "4 - " },
   { 8.00, "8 - " },
   { 12.00, "8 - " },
-  { 16.00, "16 - " },
+  { 16.00, "16 - Bass starts" },
+  { 18.00, "18 - " },
   { 20.00, "20 - " },
+  { 22.00, "22 - " },
   { 24.00, "24 - " },
+  { 26.00, "26 - " },
   { 28.00, "28 - " },
+  { 30.00, "30 - " },
   { 32.00, "32 - Drumkit is rolling" },
   { 48.00, "48 - Saw FX" },
   { 64.00, "64 - Breakdown Sawtooth porta" },
@@ -97,6 +101,9 @@ struct State
       m_display->setAmbientLight(now * 0.001);
       m_display->setCamera(m_pos, { 0, 1, 0 }, up);
     }
+
+    if(0)
+      m_display->setAmbientLight(0.5);
   }
 
   void pushActors()

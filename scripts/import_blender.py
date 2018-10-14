@@ -50,13 +50,13 @@ def run():
   ob.uv_textures[1].name = "LightmapUV"
 
   # ambient occlusion enable
-  bpy.data.worlds["World"].ambient_color[0] = 0.1
-  bpy.data.worlds["World"].ambient_color[1] = 0.1
-  bpy.data.worlds["World"].ambient_color[2] = 0.1
+  bpy.data.worlds["World"].ambient_color[0] = 0.01
+  bpy.data.worlds["World"].ambient_color[1] = 0.01
+  bpy.data.worlds["World"].ambient_color[2] = 0.01
   bpy.data.worlds["World"].light_settings.use_ambient_occlusion=True
   bpy.data.worlds["World"].light_settings.ao_factor=2.0
   bpy.data.worlds["World"].light_settings.use_environment_light=True
-  bpy.data.worlds["World"].light_settings.environment_energy=0.1
+  bpy.data.worlds["World"].light_settings.environment_energy=0.01
   bpy.data.worlds["World"].light_settings.samples = 10
 
   #----------------------------------------------------------------------------
@@ -242,11 +242,11 @@ def dumpMesh(mesh, filepath):
     for tri in triangles:
         for vertex in (tri.a, tri.b, tri.c):
             line = ""
-            line += str(round(vertex.pos.x, 4))
+            line += str(round(vertex.pos.x, 6))
             line += " "
-            line += str(round(vertex.pos.y, 4))
+            line += str(round(vertex.pos.y, 6))
             line += " "
-            line += str(round(vertex.pos.z, 4))
+            line += str(round(vertex.pos.z, 6))
             line += " - "
             line += "1" # nx
             line += " "
