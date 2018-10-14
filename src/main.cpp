@@ -123,8 +123,8 @@ private:
   int curr = -1;
 
   Vec3 m_pos = { 0, -5, 0 };
-  unique_ptr<Audio> m_audio;
   unique_ptr<Display> m_display;
+  unique_ptr<Audio> m_audio;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -4,6 +4,8 @@ EXT?=exe
 
 all: $(BIN)/rel/abrasive.$(EXT)
 
+CXXFLAGS+=-Wall -Wextra -Werror
+
 SRCS:=\
 	src/main.cpp\
 	src/mesh.cpp\

@@ -75,7 +75,7 @@ private:
       m_musicPos += readSize;
 
       // loop point is halfway
-      if(m_musicPos >= m_music.size())
+      if(m_musicPos >= (int)m_music.size())
         m_musicPos = m_music.size() / 2;
 
       samples += readSize;
