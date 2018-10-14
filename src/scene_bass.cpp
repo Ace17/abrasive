@@ -9,6 +9,11 @@ using namespace std;
 
 namespace
 {
+static double frac(double val)
+{
+  return val - floor(val);
+}
+
 struct BassScene : Scene
 {
   BassScene(Display* display) :
@@ -18,6 +23,9 @@ struct BassScene : Scene
 
   void tick(double clock) override
   {
+    if(frac(clock * 0.5) < 0.1)
+      m_display->pulse();
+
     updateState(clock);
     pushActors();
   }
