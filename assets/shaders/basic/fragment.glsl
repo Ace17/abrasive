@@ -13,11 +13,12 @@ out vec4 color;
 // Values that stay constant for the whole mesh
 uniform sampler2D DiffuseTex;
 uniform sampler2D LightmapTex;
+uniform float AmbientLight;
 
 void main()
 {
   float light = length(texture2D(LightmapTex, UV2).xyz);
-  color = texture2D(DiffuseTex, UV) * light;
+  color = vec4(texture2D(DiffuseTex, UV).rgb * light * AmbientLight, 1);
 }
 
 // vim: syntax=glsl

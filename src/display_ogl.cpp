@@ -186,11 +186,11 @@ struct OpenglDisplay : Display
 
   void update() override
   {
-    m_ambientLight *= 0.97;
+    m_pulseLight *= 0.9;
 
     updateViewport();
 
-    CALL(glClearColor(m_ambientLight, m_ambientLight, m_ambientLight, 1));
+    CALL(glClearColor(1, 0, 0, 1));
     CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
     drawObjects();
@@ -249,12 +249,18 @@ struct OpenglDisplay : Display
 
   void pulse() override
   {
-    m_ambientLight = 0.5;
+    m_pulseLight = 1;
+  }
+
+  void setAmbientLight(float value) override
+  {
+    m_ambientLight = value;
   }
 
 private:
   float m_aspectRatio = 1.0f;
   double m_ambientLight = 0;
+  double m_pulseLight = 0;
   std::vector<Actor> m_actors;
   SDL_Window* m_window;
   SDL_GLContext m_context;
@@ -299,6 +305,8 @@ private:
       auto& model = m_models[actor.model];
       int program = m_shaders[actor.shader];
       CALL(glUseProgram(program));
+
+      CALL(glUniform1f(getUniformIndex(program, "AmbientLight"), m_ambientLight + m_pulseLight));
 
       {
         auto const pos = ::translate(actor.pos);

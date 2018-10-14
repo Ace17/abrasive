@@ -16,6 +16,7 @@ struct Display
   virtual void update() = 0;
   virtual void showText(const char* msg) = 0;
   virtual void pulse() = 0;
+  virtual void setAmbientLight(float) = 0;
   virtual void loadShader(int shaderId, const char* path) = 0;
   virtual void loadModel(int modelId, const char* path) = 0;
   virtual void pushActor(Actor const& actor) = 0;

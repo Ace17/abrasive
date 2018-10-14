@@ -93,6 +93,8 @@ struct State
       m_display->pushActor(actor);
     }
 
+    if(now >= 16)
+      m_display->setAmbientLight(now * 0.01);
     m_display->update();
   }
 
