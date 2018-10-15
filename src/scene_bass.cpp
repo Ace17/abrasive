@@ -40,7 +40,6 @@ struct BassScene : Scene
     up.z = cos(t * 0.1);
 
     m_display->setLightPos(pos + Vec3 { 0, float(min(now, 10.0)), 0 });
-
     m_display->setAmbientLight(now * 0.01);
     m_display->setCamera(pos, { 0, 1, 0 }, up);
   }
@@ -54,8 +53,6 @@ struct BassScene : Scene
   }
 
 private:
-  int curr = -1;
-
   Display* const m_display;
 };
 
