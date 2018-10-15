@@ -16,10 +16,9 @@
 #include <vector>
 #include <string>
 
-#include "SDL.h"
-
 #define GL_GLEXT_PROTOTYPES 1
-#include "GL/gl.h"
+#include "SDL_opengl.h"
+#include "SDL.h"
 
 using namespace std;
 
