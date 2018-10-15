@@ -5,6 +5,7 @@
 #include "mat4.h"
 
 #include <memory>
+#include <map>
 #include <vector>
 #include <string>
 
@@ -139,6 +140,8 @@ struct OpenglDisplay : Display
 {
   OpenglDisplay()
   {
+    printf("[display] Starting\n");
+
     if(SDL_InitSubSystem(SDL_INIT_VIDEO))
       Fail("Can't init SDL");
 
@@ -178,9 +181,13 @@ struct OpenglDisplay : Display
 
   ~OpenglDisplay()
   {
+    for(auto tex : m_textures)
+      glDeleteTextures(1, &tex.second);
+
     SDL_GL_DeleteContext(m_context);
     SDL_DestroyWindow(m_window);
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
+    printf("[display] Shutdown\n");
   }
 
   void update() override
@@ -292,6 +299,7 @@ private:
   };
 
   vector<Model> m_models;
+  map<string, GLuint> m_textures;
   vector<GLuint> m_shaders;
 
   void updateViewport()
@@ -359,6 +367,16 @@ private:
       CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
       CALL(glBindTexture(GL_TEXTURE_2D, 0));
     }
+  }
+
+  GLuint loadTexture(const char* path)
+  {
+    auto i_tex = m_textures.find(path);
+
+    if(i_tex == m_textures.end())
+      m_textures[path] = ::loadTexture(path);
+
+    return m_textures[path];
   }
 
   static void connectAttribute(int offset, int size, int program, const char* name)

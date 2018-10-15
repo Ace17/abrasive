@@ -30,7 +30,7 @@ struct SdlAudio : Audio
     if(SDL_OpenAudio(&requested, &actual))
       Fail("Can't open audio");
 
-    fprintf(stderr, "[audio] %d Hz %d ch %d samples (%.2f ms)\n", actual.freq, actual.channels, actual.samples, actual.samples * 1000.0 / double(actual.freq));
+    printf("[audio] %d Hz %d ch %d samples (%.2f ms)\n", actual.freq, actual.channels, actual.samples, actual.samples * 1000.0 / double(actual.freq));
 
     m_timeInSamples = -actual.samples;
     m_timeInTicks = 0;
@@ -42,6 +42,7 @@ struct SdlAudio : Audio
     SDL_PauseAudio(1);
     SDL_CloseAudio();
     SDL_QuitSubSystem(SDL_INIT_AUDIO);
+    printf("[audio] Shutdown\n");
   }
 
   double getTime()
