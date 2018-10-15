@@ -241,7 +241,8 @@ struct OpenglDisplay : Display
     auto& vertices = model.mesh.vertices;
 
     {
-      model.diffuse = loadTexture("assets/textures/tex2.bmp");
+      model.diffuse = loadTexture("assets/textures/tex3.bmp");
+      model.normalmap = loadTexture("assets/textures/tex3.bmp.normals.bmp");
     }
 
     {
@@ -302,6 +303,7 @@ private:
     GLuint vbo;
     GLuint diffuse;
     GLuint lightmap;
+    GLuint normalmap;
   };
 
   vector<Model> m_models;
@@ -368,6 +370,11 @@ private:
       CALL(glBindTexture(GL_TEXTURE_2D, model.lightmap));
       CALL(glUniform1i(getUniformIndex(program, "LightmapTex"), 1));
 
+      // Texture Unit 2: Normalmap
+      CALL(glActiveTexture(GL_TEXTURE2));
+      CALL(glBindTexture(GL_TEXTURE_2D, model.normalmap));
+      CALL(glUniform1i(getUniformIndex(program, "NormalmapTex"), 2));
+
       CALL(glDrawArrays(GL_TRIANGLES, 0, model.mesh.vertices.size()));
 
       CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
@@ -409,7 +416,7 @@ private:
     auto const index = glGetUniformLocation(program, name);
 
     if(index < 0)
-      Fail("Unknown shader attribute: '%s'", name);
+      Fail("Unknown shader uniform: '%s'", name);
 
     return index;
   }

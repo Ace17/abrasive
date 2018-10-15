@@ -36,6 +36,9 @@ static const SceneInstance g_scenePlaylist[] =
   { "debug", 128.0 },
   { "intro", 16.0 },
   { "buildup", 16.0 },
+  { "buildup", 16.0 },
+  { "buildup", 16.0 },
+  { "buildup", 16.0 },
 };
 
 // in beats
