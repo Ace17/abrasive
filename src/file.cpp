@@ -31,5 +31,4 @@ std::vector<T> load(const char* path)
 }
 
 template std::vector<uint8_t> load<uint8_t>(const char*);
-template std::vector<int16_t> load<int16_t>(const char*);
 
