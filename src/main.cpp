@@ -33,6 +33,7 @@ struct SceneInstance
 
 static const SceneInstance g_scenePlaylist[] =
 {
+  { "debug", 128.0 },
   { "intro", 16.0 },
   { "buildup", 16.0 },
 };
@@ -121,7 +122,7 @@ void destroy()
 
 int main(int argc, char* argv[])
 {
-  int sceneIndex = 0;
+  int sceneIndex = 1;
 
   if(argc >= 2)
     sceneIndex = atoi(argv[1]);
