@@ -93,6 +93,6 @@ Scene* create(Display* display)
   return new InitScene(display);
 }
 
-static int registered = registerScene("init", &create);
+static int registered = registerScene("intro", &create);
 }
 

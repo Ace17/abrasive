@@ -69,6 +69,6 @@ Scene* create(Display* display)
   return new BassScene(display);
 }
 
-static int registered = registerScene("bass", &create);
+static int registered = registerScene("buildup", &create);
 }
 

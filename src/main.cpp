@@ -33,8 +33,8 @@ struct SceneInstance
 
 static const SceneInstance g_scenePlaylist[] =
 {
-  { "init", 16.0 },
-  { "bass", 16.0 },
+  { "intro", 16.0 },
+  { "buildup", 16.0 },
 };
 
 // in beats
