@@ -241,7 +241,7 @@ struct OpenglDisplay : Display
     auto& vertices = model.mesh.vertices;
 
     {
-      model.diffuse = loadTexture("assets/textures/tex3.bmp");
+      model.diffuse = loadTexture("assets/textures/tex2.bmp");
       model.normalmap = loadTexture("assets/textures/tex3.bmp.normals.bmp");
     }
 
