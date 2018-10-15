@@ -167,7 +167,6 @@ struct OpenglDisplay : Display
     SDL_GL_SetSwapInterval(1);
 
     m_font = loadTexture("assets/font.bmp");
-    m_texture = loadTexture("assets/textures/tex2.bmp");
 
     GLuint vertexArray;
     CALL(glGenVertexArrays(1, &vertexArray));
@@ -229,6 +228,10 @@ struct OpenglDisplay : Display
     auto& vertices = model.mesh.vertices;
 
     {
+      model.diffuse = loadTexture("assets/textures/tex2.bmp");
+    }
+
+    {
       string basePath = path;
       model.lightmap = loadTexture((basePath + ".lightmap.bmp").c_str());
     }
@@ -279,12 +282,12 @@ private:
   SDL_Window* m_window;
   SDL_GLContext m_context;
   GLuint m_font;
-  GLuint m_texture;
 
   struct Model
   {
     Mesh mesh;
     GLuint vbo;
+    GLuint diffuse;
     GLuint lightmap;
   };
 
@@ -343,7 +346,7 @@ private:
 
       // Texture Unit 0: Diffuse
       CALL(glActiveTexture(GL_TEXTURE0));
-      CALL(glBindTexture(GL_TEXTURE_2D, m_texture));
+      CALL(glBindTexture(GL_TEXTURE_2D, model.diffuse));
       CALL(glUniform1i(getUniformIndex(program, "DiffuseTex"), 0));
 
       // Texture Unit 1: Lightmap
