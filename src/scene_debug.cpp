@@ -32,9 +32,9 @@ struct DebugScene : Scene
 
   void updateState(double now)
   {
-    Vec3 pos = { -1, -1, 2 };
+    Vec3 pos = { (float)cos(now * 0.1), (float)sin(now * 0.1), 1 };
     Vec3 up = { 0, 0, 1 };
-    Vec3 dir = { 1, 1, -1 };
+    Vec3 dir = pos * -1;
 
     Vec3 lightPos;
     lightPos.x = cos(now * 1.5) * 1.4;
@@ -44,11 +44,13 @@ struct DebugScene : Scene
     m_display->setLightPos(lightPos);
     m_display->setAmbientLight(0.5);
     m_display->setCamera(pos, dir, up);
+    m_display->showText("Hello world");
   }
 
   void pushActors()
   {
     Actor actor;
+    actor.pos = Vec3 { -0.5, -0.5, -0.5 };
     actor.model = MODEL_BOX;
     actor.shader = SHADER_BASIC;
     m_display->pushActor(actor);

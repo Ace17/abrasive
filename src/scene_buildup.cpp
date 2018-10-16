@@ -31,7 +31,7 @@ struct BassScene : Scene
 
   void tick(double clock) override
   {
-    if(frac(clock * 0.5) < 0.01)
+    if(frac(clock * 0.25) < 0.01)
       m_display->pulse();
 
     updateState(clock);

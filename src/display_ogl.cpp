@@ -71,7 +71,7 @@ GLuint loadTexture(const char* path)
   CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
   CALL(glBindTexture(GL_TEXTURE_2D, 0));
 
-  printf("[display] Loaded %s (%dx%d)\n", path, WIDTH, HEIGHT);
+  printf("[display] Loaded texture: %s (%dx%d)\n", path, WIDTH, HEIGHT);
 
   return texture;
 }
@@ -84,7 +84,6 @@ int compileShader(vector<uint8_t> code, int type)
   if(!shaderId)
     throw runtime_error("Can't create shader");
 
-  printf("[display] compiling %s shader ... ", (type == GL_VERTEX_SHADER ? "vertex" : "fragment"));
   auto srcPtr = (const char*)code.data();
   auto length = (GLint)code.size();
   CALL(glShaderSource(shaderId, 1, &srcPtr, &length));
@@ -105,16 +104,12 @@ int compileShader(vector<uint8_t> code, int type)
     throw runtime_error("Can't compile shader");
   }
 
-  printf("OK\n");
-
   return shaderId;
 }
 
 static
 int linkShaders(vector<int> ids)
 {
-  // Link the program
-  printf("[display] Linking shaders ... ");
   auto ProgramID = glCreateProgram();
 
   for(auto id : ids)
@@ -136,8 +131,6 @@ int linkShaders(vector<int> ids)
 
     throw runtime_error("Can't link shader");
   }
-
-  printf("OK\n");
 
   return ProgramID;
 }
@@ -175,11 +168,24 @@ struct OpenglDisplay : Display
     // V-sync
     SDL_GL_SetSwapInterval(1);
 
-    m_font = loadTexture("assets/font.bmp");
-
     GLuint vertexArray;
     CALL(glGenVertexArrays(1, &vertexArray));
     CALL(glBindVertexArray(vertexArray));
+
+    // Font
+    {
+      m_font = loadTexture("assets/font.bmp");
+      CALL(glBindTexture(GL_TEXTURE_2D, m_font));
+      CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP));
+      CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP));
+      CALL(glBindTexture(GL_TEXTURE_2D, 0));
+
+      m_fontShader = loadShader("assets/shaders/text");
+      CALL(glGenBuffers(1, &m_fontVbo));
+      CALL(glBindBuffer(GL_ARRAY_BUFFER, m_fontVbo));
+      CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, NULL, GL_DYNAMIC_DRAW));
+      CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    }
 
     CALL(glEnable(GL_DEPTH_TEST));
     CALL(glEnable(GL_CULL_FACE));
@@ -199,6 +205,7 @@ struct OpenglDisplay : Display
   void update() override
   {
     m_pulseLight *= 0.9;
+    m_pulseText *= 0.9;
 
     updateViewport();
 
@@ -206,6 +213,7 @@ struct OpenglDisplay : Display
     CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
     drawObjects();
+    drawText();
 
     SDL_GL_SwapWindow(m_window);
     m_actors.clear();
@@ -213,10 +221,17 @@ struct OpenglDisplay : Display
 
   void showText(const char* msg) override
   {
-    printf("%s\n", msg);
+    m_pulseText = 1.0;
+    m_text = msg;
   }
 
   void loadShader(int id, const char* path)
+  {
+    grow(m_shaders, id);
+    m_shaders[id] = loadShader(path);
+  }
+
+  int loadShader(const char* path)
   {
     string basePath = path;
     auto VertexShaderCode = load<uint8_t>((basePath + "/vertex.glsl").c_str());
@@ -229,8 +244,9 @@ struct OpenglDisplay : Display
     CALL(glDeleteShader(vertexId));
     CALL(glDeleteShader(fragmentId));
 
-    grow(m_shaders, id);
-    m_shaders[id] = progId;
+    printf("[display] Loaded shader: %s\n", path);
+
+    return progId;
   }
 
   void loadModel(int id, const char* path) override
@@ -292,10 +308,15 @@ private:
   double m_pulseLight = 0;
   Vec3 m_lightPos;
   Vec3 m_cameraPos, m_cameraFwd, m_cameraUp;
+  double m_pulseText = 0;
+  std::string m_text;
   std::vector<Actor> m_actors;
   SDL_Window* m_window;
   SDL_GLContext m_context;
+
   GLuint m_font;
+  GLuint m_fontVbo;
+  GLuint m_fontShader;
 
   struct Model
   {
@@ -320,6 +341,7 @@ private:
 
   void drawObjects()
   {
+    CALL(glEnable(GL_DEPTH_TEST));
     static const float fovy = (float)((60.0f / 180) * M_PI);
     static const float near_ = 0.1f;
     static const float far_ = 100.0f;
@@ -355,10 +377,10 @@ private:
 
       CALL(glBindBuffer(GL_ARRAY_BUFFER, model.vbo));
 
-      connectAttribute(0, 3, program, "vertexPos");
-      connectAttribute(3, 3, program, "vertexNormal");
-      connectAttribute(6, 2, program, "vertexUV");
-      connectAttribute(8, 2, program, "vertexUV2");
+      connectAttribute(0, 3, sizeof(Vertex), program, "vertexPos");
+      connectAttribute(3, 3, sizeof(Vertex), program, "vertexNormal");
+      connectAttribute(6, 2, sizeof(Vertex), program, "vertexUV");
+      connectAttribute(8, 2, sizeof(Vertex), program, "vertexUV2");
 
       // Texture Unit 0: Diffuse
       CALL(glActiveTexture(GL_TEXTURE0));
@@ -382,6 +404,67 @@ private:
     }
   }
 
+  void drawText()
+  {
+    if(m_pulseText < 0.001)
+      return;
+
+    CALL(glDisable(GL_DEPTH_TEST));
+    CALL(glEnable(GL_BLEND));
+    CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
+    CALL(glUseProgram(m_fontShader));
+    CALL(glActiveTexture(GL_TEXTURE0));
+    CALL(glBindTexture(GL_TEXTURE_2D, m_font));
+
+    const GLfloat w = 0.1;
+    const GLfloat h = 0.1;
+
+    float x = -(m_text.size() * w / 2);
+    float y = 0;
+
+    for(auto c : m_text)
+    {
+      auto const col = c % 16;
+      auto const row = 15 - c / 16;
+      auto const N = 16.0f;
+      auto const u0 = (col + 0) / N;
+      auto const u1 = (col + 1) / N;
+      auto const v0 = (row + 0) / N;
+      auto const v1 = (row + 1) / N;
+
+      struct Vertex2d
+      {
+        float x, y;
+        float u, v;
+      };
+
+      Vertex2d vertices[] =
+      {
+        { x + 0, y + 0, u0, v0 },
+        { x + w, y + 0, u1, v0 },
+        { x + 0, y + h, u0, v1 },
+
+        { x + 0, y + h, u0, v1 },
+        { x + w, y + 0, u1, v0 },
+        { x + w, y + h, u1, v1 },
+      };
+
+      CALL(glBindBuffer(GL_ARRAY_BUFFER, m_fontVbo));
+      CALL(glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices));
+      connectAttribute(0, 2, sizeof(Vertex2d), m_fontShader, "textPos");
+      connectAttribute(2, 2, sizeof(Vertex2d), m_fontShader, "textUV");
+      CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+
+      CALL(glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(*vertices)));
+
+      x += w + 0.01;
+    }
+
+    CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    CALL(glBindTexture(GL_TEXTURE_2D, 0));
+  }
+
   GLuint loadTexture(const char* path)
   {
     auto i_tex = m_textures.find(path);
@@ -392,9 +475,8 @@ private:
     return m_textures[path];
   }
 
-  static void connectAttribute(int offset, int size, int program, const char* name)
+  static void connectAttribute(int offset, int size, size_t stride, int program, const char* name)
   {
-    auto const stride = sizeof(Vertex);
     auto const index = getAttributeIndex(program, name);
     auto pOffset = (const GLvoid*)(offset * sizeof(GLfloat));
     CALL(glEnableVertexAttribArray(index));
