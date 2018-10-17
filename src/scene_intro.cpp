@@ -9,6 +9,7 @@
 #include "scene.h"
 #include "display.h"
 #include "vec3.h"
+#include "timeline.h"
 
 #include <vector>
 #include <cmath>
@@ -17,30 +18,12 @@ using namespace std;
 
 namespace
 {
-struct Event
-{
-  double clockTime; // in beats
-  const char* text = "";
-};
-
 const vector<Event> timeline =
 {
   { 0.00, "0 - Start" },
   { 4.00, "4 - " },
   { 8.00, "8 - " },
   { 12.00, "12 - " },
-  { 16.00, "16 - Bass starts" },
-  { 18.00, "18 - " },
-  { 20.00, "20 - " },
-  { 22.00, "22 - " },
-  { 24.00, "24 - " },
-  { 26.00, "26 - " },
-  { 28.00, "28 - " },
-  { 30.00, "30 - " },
-  { 32.00, "32 - Drumkit is rolling" },
-  { 48.00, "48 - Saw FX" },
-  { 64.00, "64 - Breakdown Sawtooth porta" },
-  { 96.00, "96 - End" },
 };
 
 struct InitScene : Scene
@@ -48,6 +31,7 @@ struct InitScene : Scene
   InitScene(Display* display) :
     m_display(display)
   {
+    m_timeline.events = timeline;
   }
 
   void tick(double clock) override
@@ -58,11 +42,7 @@ struct InitScene : Scene
 
   void updateState(double now)
   {
-    while(curr + 1 < (int)timeline.size() && now >= timeline[curr + 1].clockTime)
-    {
-      curr++;
-      m_display->showText(timeline[curr].text);
-    }
+    m_timeline.update(now, m_display);
 
     Vec3 lightPos;
     lightPos.x = cos(now * 2.0 * M_PI * 0.25) * 3.0;
@@ -82,10 +62,9 @@ struct InitScene : Scene
   }
 
 private:
-  int curr = -1;
-
   Vec3 m_pos = { 0, -5, 0 };
   Display* const m_display;
+  Timeline m_timeline;
 };
 
 Scene* create(Display* display)
