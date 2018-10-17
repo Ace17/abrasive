@@ -125,7 +125,8 @@ private:
 
   void mixSamples(uint8_t* dstBuf, int dstLen)
   {
-    auto const deltaTime = dstLen / (sizeof(short) * m_audioSpec.channels);
+    auto const bytesPerSample = (m_audioSpec.format & 0xFF) / 8;
+    auto const deltaTime = dstLen / (bytesPerSample * m_audioSpec.channels);
 
     while(dstLen > 0)
     {
