@@ -17,6 +17,7 @@ SRCS:=\
 # Scenes
 SRCS+=src/scene_intro.cpp
 SRCS+=src/scene_buildup.cpp
+SRCS+=src/scene_ending.cpp
 SRCS+=src/scene_debug.cpp
 
 CXXFLAGS+=$(shell pkg-config gl sdl2 --cflags)

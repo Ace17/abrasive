@@ -33,16 +33,13 @@ void main()
 
   // contribution from the moving point light
   float dist = length(LightPos - worldPos);
-  float intensity = 1.0;
+  float intensity = 2.0;
   vec3 toLight = normalize(LightPos - worldPos);
   float attenuation = 1.0 / (dist*dist);
   light += max(0.0, dot(toLight, N)) * intensity * attenuation;
 
-  // contribution from the ambient light
-  light += AmbientLight;
-
   // contribution from the lightmap
-  light += 0.02 * length(texture2D(LightmapTex, UV2).xyz);
+  light += length(texture2D(LightmapTex, UV2).xyz) * AmbientLight;
 
   color = vec4(texture2D(DiffuseTex, UV).rgb * light, 1);
 }

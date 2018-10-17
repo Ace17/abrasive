@@ -20,6 +20,11 @@ def run():
     bpy.context.scene.objects.active = bpy.context.selected_objects[0]
     bpy.ops.object.convert(target='MESH')
 
+  bpy.ops.object.select_by_type(type='FONT')
+  for obj in bpy.context.selected_objects:
+    bpy.context.scene.objects.active = obj
+    bpy.ops.object.convert(target='MESH')
+
   # remove non-displayed objects (triggers)
   for obj in bpy.data.objects:
     if obj.name.startswith("f."):
@@ -28,6 +33,7 @@ def run():
   #----------------------------------------------------------------------------
   # join everything into one single object
   #----------------------------------------------------------------------------
+  bpy.ops.object.select_by_type(type='MESH')
   if len(bpy.context.selected_objects) > 0:
     bpy.context.scene.objects.active = bpy.context.selected_objects[0]
     bpy.ops.object.join()
