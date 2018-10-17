@@ -205,7 +205,7 @@ struct OpenglDisplay : Display
   void update() override
   {
     m_pulseLight *= 0.9;
-    m_pulseText *= 0.9;
+    m_pulseText *= 0.985;
 
     updateViewport();
 
@@ -414,13 +414,14 @@ private:
     CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
     CALL(glUseProgram(m_fontShader));
+    CALL(glUniform1f(getUniformIndex(m_fontShader, "TextLight"), m_pulseText));
     CALL(glActiveTexture(GL_TEXTURE0));
     CALL(glBindTexture(GL_TEXTURE_2D, m_font));
 
-    const GLfloat w = 0.1;
-    const GLfloat h = 0.1;
+    const GLfloat w = 0.05;
+    const GLfloat h = w * m_aspectRatio;
 
-    float x = -(m_text.size() * w / 2);
+    float x = -(m_text.size() * w / 2) - w;
     float y = 0;
 
     for(auto c : m_text)
