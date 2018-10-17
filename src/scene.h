@@ -11,6 +11,7 @@
 
 struct Scene
 {
+  virtual ~Scene() = default;
   virtual void tick(double clock) = 0;
 };
 
