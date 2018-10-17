@@ -19,6 +19,7 @@
 #include "audio.h"
 #include "display.h"
 #include "scene.h"
+#include "world.h"
 
 using namespace std;
 
@@ -56,6 +57,8 @@ struct State
     m_display->loadShader(SHADER_BASIC, "assets/shaders/basic");
     m_display->loadModel(MODEL_BOX, "assets/meshes/box.mesh");
     m_display->loadModel(MODEL_ROOM, "assets/meshes/room.mesh");
+
+    m_world = loadLevel("assets/level.lev");
   }
 
   void tick()
@@ -65,7 +68,7 @@ struct State
     if(!m_scene)
     {
       auto instance = g_scenePlaylist[m_sceneIndex];
-      m_scene = createScene(instance.name, m_display.get());
+      m_scene = createScene(instance.name, m_display.get(), &m_world);
       m_sceneStartTime = clock;
       printf("Scene: %s\n", instance.name);
     }
@@ -97,6 +100,7 @@ private:
   unique_ptr<Scene> m_scene;
   unique_ptr<Display> m_display;
   unique_ptr<Audio> m_audio;
+  World m_world;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -10,6 +10,7 @@
 #include "display.h"
 #include "vec3.h"
 #include "timeline.h"
+#include "world.h"
 
 #include <vector>
 #include <cmath>
@@ -29,10 +30,11 @@ static double frac(double val)
   return val - floor(val);
 }
 
-struct BassScene : Scene
+struct BuildupScene : Scene
 {
-  BassScene(Display* display) :
-    m_display(display)
+  BuildupScene(Display* display, World* world) :
+    m_display(display),
+    m_world(world)
   {
     m_timeline.events = timeline;
   }
@@ -48,9 +50,16 @@ struct BassScene : Scene
     pushActors();
   }
 
+  static Vec3 blend(Vec3 a, Vec3 b, float alpha)
+  {
+    return a * (1 - alpha) + b * alpha;
+  }
+
   void updateState(double now)
   {
-    Vec3 pos = { 0, -5 + float(now * 2.0), 0 };
+    auto a = m_world->locators.at("loc.000");
+    auto b = m_world->locators.at("loc.003");
+    Vec3 pos = blend(a, b, now / 16);
     auto t = now;
     Vec3 up;
     up.x = sin(t * 0.1);
@@ -72,12 +81,13 @@ struct BassScene : Scene
 
 private:
   Display* const m_display;
+  World* const m_world;
   Timeline m_timeline;
 };
 
-Scene* create(Display* display)
+Scene* create(Display* display, World* world)
 {
-  return new BassScene(display);
+  return new BuildupScene(display, world);
 }
 
 static int registered = registerScene("buildup", &create);

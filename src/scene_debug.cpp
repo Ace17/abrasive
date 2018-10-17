@@ -60,7 +60,7 @@ private:
   Display* const m_display;
 };
 
-Scene* create(Display* display)
+Scene* create(Display* display, World*)
 {
   return new DebugScene(display);
 }

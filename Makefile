@@ -11,6 +11,7 @@ SRCS:=\
 	src/mesh.cpp\
 	src/file.cpp\
 	src/scene.cpp\
+	src/world.cpp\
 	src/audio_sdl.cpp\
 	src/display_ogl.cpp\
 

@@ -26,8 +26,9 @@ enum
 };
 
 struct Display;
-typedef Scene* SceneCreationFunc (Display*);
+struct World;
+typedef Scene* SceneCreationFunc (Display*, World*);
 
 int registerScene(std::string name, SceneCreationFunc* func);
-std::unique_ptr<Scene> createScene(std::string name, Display*);
+std::unique_ptr<Scene> createScene(std::string name, Display*, World*);
 

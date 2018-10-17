@@ -67,7 +67,7 @@ private:
   Timeline m_timeline;
 };
 
-Scene* create(Display* display)
+Scene* create(Display* display, World*)
 {
   return new InitScene(display);
 }
