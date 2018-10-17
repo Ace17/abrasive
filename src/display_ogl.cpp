@@ -22,19 +22,23 @@
 
 using namespace std;
 
+#ifndef NDEBUG
 static void checkGl(const char* caption, const char* file, int line)
 {
-#ifndef NDEBUG
   auto errorCode = glGetError();
 
   if(errorCode != GL_NO_ERROR)
     Fail("[%s:%d] %s returned %d\n", file, line, caption, errorCode);
-
-#endif
 }
 
 #define CALL(a) \
   do { a; checkGl(# a, __FILE__, __LINE__); } while(0)
+#else
+
+#define CALL(a) \
+  do { a; } while(0)
+
+#endif
 
 static
 GLuint loadTexture(const char* path)

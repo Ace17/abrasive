@@ -1,8 +1,7 @@
 BIN?=bin
+EXT?=.exe
 
-EXT?=exe
-
-all: $(BIN)/rel/abrasive.$(EXT)
+all: $(BIN)/rel/abrasive$(EXT)
 
 CXXFLAGS+=-Wall -Wextra -Werror
 
@@ -27,7 +26,7 @@ LDFLAGS+=$(shell pkg-config gl sdl2 --libs)
 CXXFLAGS+=-g3
 LDFLAGS+=-g
 
-$(BIN)/rel/abrasive.$(EXT): $(SRCS:%=$(BIN)/%.o)
+$(BIN)/rel/abrasive$(EXT): $(SRCS:%=$(BIN)/%.o)
 
 #------------------------------------------------------------------------------
 
@@ -39,7 +38,7 @@ $(BIN)/%.cpp.o: %.cpp
 	@$(CXX) $(CXXFLAGS) -c $< -MM -MP -MT "$@" -o "$(BIN)/$*.dep"
 	$(CXX) $(CXXFLAGS) -c -o "$@" $<
 
-$(BIN)/%.exe:
+$(BIN)/%$(EXT):
 	@mkdir -p $(dir $@)
 	$(CXX) $(LDFLAGS) -o "$@" $^
 
