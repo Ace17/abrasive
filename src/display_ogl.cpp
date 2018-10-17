@@ -225,7 +225,7 @@ struct OpenglDisplay : Display
     m_text = msg;
   }
 
-  void loadShader(int id, const char* path)
+  void loadShader(int id, const char* path) override
   {
     grow(m_shaders, id);
     m_shaders[id] = loadShader(path);
