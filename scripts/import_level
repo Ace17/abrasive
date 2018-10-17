@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+readonly scriptDir="$(dirname $0)"
+
+readonly input=$1
+readonly output=$2
+
+export PYTHONPATH+=$scriptDir
+blender "$input" --background \
+  --python $scriptDir/import_level.py \
+  --python-exit-code \
+  -- "$output.tmp" >/dev/null
+
+# make the operation atomic
+mv "$output.tmp" "$output"
+
