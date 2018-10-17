@@ -8,7 +8,6 @@
 #include "scene.h"
 #include "display.h"
 #include "vec3.h"
-#include "timeline.h"
 
 #include <vector>
 #include <cmath>
@@ -17,12 +16,6 @@ using namespace std;
 
 namespace
 {
-const vector<Event> timeline =
-{
-  { 0.00, "Bass Starts" },
-  { 4.00, "Bass continues" },
-};
-
 static double frac(double val)
 {
   return val - floor(val);
@@ -33,13 +26,10 @@ struct EndingScene : Scene
   EndingScene(Display* display) :
     m_display(display)
   {
-    m_timeline.events = timeline;
   }
 
   void tick(double clock) override
   {
-    m_timeline.update(clock, m_display);
-
     if(frac(clock * 0.25) < 0.01)
       m_display->pulse();
 
@@ -68,7 +58,6 @@ struct EndingScene : Scene
 
 private:
   Display* const m_display;
-  Timeline m_timeline;
 };
 
 Scene* create(Display* display)
