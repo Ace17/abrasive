@@ -242,9 +242,7 @@ def extractTriangles(mesh):
 def dumpMesh(mesh, filepath):
     triangles = extractTriangles(mesh)
 
-    # Open the file for writing:
     file = open(filepath, 'w')
-
     file.write("# x y z - nx ny nz - u1 v1 - u2 v2\n")
 
     for tri in triangles:
@@ -272,7 +270,6 @@ def dumpMesh(mesh, filepath):
             file.write(line + "\n")
         file.write("\n")
 
-    # Close the file:
     file.close()
 
 
