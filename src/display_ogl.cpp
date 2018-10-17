@@ -176,8 +176,8 @@ struct OpenglDisplay : Display
     {
       m_font = loadTexture("assets/font.bmp");
       CALL(glBindTexture(GL_TEXTURE_2D, m_font));
-      CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP));
-      CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP));
+      CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+      CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
       CALL(glBindTexture(GL_TEXTURE_2D, 0));
 
       m_fontShader = loadShader("assets/shaders/text");
