@@ -19,7 +19,7 @@ static map<std::string, SceneCreationFunc*> g_scenes;
 int registerScene(std::string name, SceneCreationFunc* func)
 {
   if(g_scenes.find(name) != g_scenes.end())
-    Fail("a scene named '%s' is already registered", name);
+    Fail("a scene named '%s' is already registered", name.c_str());
 
   g_scenes[name] = func;
   return 0;
