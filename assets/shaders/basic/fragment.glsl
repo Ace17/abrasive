@@ -28,7 +28,7 @@ void main()
 {
   float light = 0.0;
 
-  vec3 N2 = rotateToWorld(texture2D(NormalmapTex, UV).xyz);
+  vec3 N2 = rotateToWorld(texture(NormalmapTex, UV).xyz);
   vec3 N = normalize(worldNormal + 2.0 * N2 - 1.0);
 
   // contribution from the moving point light
@@ -39,9 +39,9 @@ void main()
   light += max(0.0, dot(toLight, N)) * intensity * attenuation;
 
   // contribution from the lightmap
-  light += length(texture2D(LightmapTex, UV2).xyz) * AmbientLight;
+  light += length(texture(LightmapTex, UV2).xyz) * AmbientLight;
 
-  color = vec4(texture2D(DiffuseTex, UV).rgb * light, 1);
+  color = vec4(texture(DiffuseTex, UV).rgb * light, 1);
 }
 
 // vim: syntax=glsl

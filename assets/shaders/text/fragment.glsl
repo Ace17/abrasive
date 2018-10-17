@@ -14,7 +14,7 @@ out vec4 color;
 
 void main()
 {
-  color = texture2D(DiffuseTex, UV) * TextLight;
+  color = texture(DiffuseTex, UV) * TextLight;
 }
 
 // vim: syntax=glsl
