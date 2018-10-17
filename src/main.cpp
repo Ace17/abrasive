@@ -125,6 +125,25 @@ void destroy()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifdef __EMSCRIPTEN__
+extern "C"
+{
+void emscripten_set_main_loop(void (* f)(), int, int);
+}
+
+static void tickTheApp()
+{
+  g_state->tick();
+}
+
+int main()
+{
+  init(1);
+  emscripten_set_main_loop(&tickTheApp, 0, 10);
+  return 0;
+}
+
+#else
 int main(int argc, char* argv[])
 {
   int sceneIndex = 1;
@@ -151,4 +170,5 @@ int main(int argc, char* argv[])
   destroy();
   return 0;
 }
+#endif
 
