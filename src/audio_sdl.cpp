@@ -38,7 +38,7 @@ struct SdlAudio : Audio
     m_music = loadMusic(musicPath);
 
     m_timeInSamples = 0;
-    m_timeInTicks = 0;
+    m_timeInTicks = SDL_GetTicks();
     SDL_PauseAudio(0);
   }
 
