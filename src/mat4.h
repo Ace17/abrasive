@@ -15,12 +15,6 @@
 // Vec3 operations
 
 inline
-double dotProduct(Vec3 a, Vec3 b)
-{
-  return a.x * b.x + a.y * b.y + a.z * b.z;
-}
-
-inline
 Vec3 crossProduct(Vec3 a, Vec3 b)
 {
   Vec3 r;
@@ -28,13 +22,6 @@ Vec3 crossProduct(Vec3 a, Vec3 b)
   r.y = a.z * b.x - a.x * b.z;
   r.z = a.x * b.y - a.y * b.x;
   return r;
-}
-
-inline
-Vec3 normalize(Vec3 vec)
-{
-  auto const magnitude = dotProduct(vec, vec);
-  return vec * (1.0 / sqrt(magnitude));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

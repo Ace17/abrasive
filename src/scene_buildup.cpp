@@ -11,6 +11,7 @@
 #include "vec3.h"
 #include "timeline.h"
 #include "world.h"
+#include "error.h"
 
 #include <vector>
 #include <cmath>
@@ -37,6 +38,13 @@ struct BuildupScene : Scene
     m_world(world)
   {
     m_timeline.events = timeline;
+
+    if(m_world->path.size() < 1)
+      Fail("No path defined");
+
+    m_pos = m_world->path[0];
+    m_vel = { 0, 0, 0 };
+    m_locatorIdx = 0;
   }
 
   void tick(double clock) override
@@ -57,18 +65,29 @@ struct BuildupScene : Scene
 
   void updateState(double now)
   {
-    auto a = m_world->locators.at("loc.000");
-    auto b = m_world->locators.at("loc.003");
-    Vec3 pos = blend(a, b, now / 16);
+    auto nextPos = m_world->path[(m_locatorIdx + 1) % m_world->path.size()];
+    auto delta = nextPos - m_pos;
+
+    if(dotProduct(delta, delta) < 0.01)
+    {
+      m_locatorIdx++;
+    }
+    else
+    {
+      m_vel = m_vel + normalize(delta) * 0.01;
+      m_vel = m_vel * 0.9;
+      m_pos = m_pos + m_vel;
+    }
+
     auto t = now;
     Vec3 up;
     up.x = sin(t * 0.1);
     up.y = 0;
     up.z = cos(t * 0.1);
 
-    m_display->setLightPos(pos + Vec3 { 0, float(min(now, 10.0)), 0 });
+    m_display->setLightPos(m_pos + Vec3 { 0, float(min(now, 10.0)), 0 });
     m_display->setAmbientLight(now * 0.01);
-    m_display->setCamera(pos, { 0, 1, 0 }, up);
+    m_display->setCamera(m_pos, m_vel, up);
   }
 
   void pushActors()
@@ -82,6 +101,9 @@ struct BuildupScene : Scene
 private:
   Display* const m_display;
   World* const m_world;
+  Vec3 m_pos;
+  Vec3 m_vel;
+  int m_locatorIdx;
   Timeline m_timeline;
 };
 

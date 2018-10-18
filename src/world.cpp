@@ -9,6 +9,7 @@
 #include "error.h"
 
 #include <fstream>
+#include <map>
 
 using namespace std;
 
@@ -19,6 +20,8 @@ World loadLevel(const char* path)
 
   if(!fp.is_open())
     Fail("Can't open level file: '%s'", path);
+
+  std::map<std::string, Vec3> locators;
 
   string line;
 
@@ -40,8 +43,11 @@ World loadLevel(const char* path)
     if(count != 4)
       Fail("Invalid line in level file: '%s'", line.c_str());
 
-    w.locators[name] = pos;
+    locators[name] = pos;
   }
+
+  for(auto& loc : locators)
+    w.path.push_back(loc.second);
 
   return w;
 }

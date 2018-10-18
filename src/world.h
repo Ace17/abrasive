@@ -10,12 +10,11 @@
 
 #include "vec3.h"
 
-#include <map>
-#include <string>
+#include <vector>
 
 struct World
 {
-  std::map<std::string, Vec3> locators;
+  std::vector<Vec3> path;
 };
 
 World loadLevel(const char* path);
